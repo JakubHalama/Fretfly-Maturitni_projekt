@@ -1,16 +1,58 @@
-# fretfly
+# 🎸 Fretfly – Flutter aplikace pro kytaristy
 
-A new Flutter project.
+> Maturitní projekt – školní rok 2024/2025
 
-## Getting Started
+---
 
-This project is a starting point for a Flutter application.
+## 📑 Obsah
+- [Popis projektu](#-popis-projektu)
+- [Cíle projektu](#-cíle-projektu)
+- [Hlavní funkce](#-hlavní-funkce)
+- [Použité programy a technologie](#-použité-programy-a-technologie)
+- [Struktura aplikace](#-struktura-aplikace)
+- [Časový harmonogram](#-časový-harmonogram)
+- [Možná rozšíření](#-možná-rozšíření)
 
-A few resources to get you started if this is your first Flutter project:
+---
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## 📝 Popis projektu
+**Fretfly** je mobilní aplikace vyvinutá ve **Flutteru** pro kytaristy všech úrovní.  
+Aplikace kombinuje užitečné nástroje (ladění, metronom, databáze akordů) s možností **nahrávání a přehrávání video tutoriálů**, což z ní dělá komplexního pomocníka pro učení i každodenní hraní na kytaru.  
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Cílem je vytvořit přehlednou a intuitivní aplikaci, která působí profesionálně, ale zároveň je snadno použitelná.
+
+---
+
+## 🎯 Cíle projektu
+- ✅ Vytvořit funkční a stabilní mobilní aplikaci pro **Android/iOS**.  
+- ✅ Implementovat **ladící nástroj (tuner)** pomocí rozpoznávání tónů.  
+- ✅ Vytvořit **metronom** s nastavitelným tempem (BPM), zvukovým i vizuálním výstupem.  
+- ✅ Implementovat **databázi akordů** s vizualizací hmatníku (diagramy).  
+- ✅ Přidat systém pro **nahrávání a ukládání video tutoriálů**, které uživatel může přehrávat přímo v aplikaci.  
+- ✅ Navrhnout moderní **UI/UX design** s podporou dark/light režimu.  
+- ✅ Vést dokumentaci celého projektu včetně zdrojového kódu na GitHubu.  
+
+---
+
+## 🎶 Hlavní funkce
+- **Tuner** – rozpoznávání tónů pomocí mikrofonu.  
+- **Metronom** – nastavení tempa, vizuální “klik” i zvuk.  
+- **Akordy** – databáze základních i rozšířených akordů s grafickými diagramy hmatníku.  
+- **Video tutoriály** – možnost nahrávání a přehrávání výukových videí.  
+- **Dark/Light režim** – profesionální vzhled aplikace.  
+
+---
+
+## 🛠 Použité programy a technologie
+- **Flutter (Dart)** – hlavní framework pro vývoj mobilní aplikace.  
+- **Android Studio / VS Code** – vývojové prostředí.  
+- **Git & GitHub** – správa verzí a dokumentace.  
+- **flutter_audio_capture** – přístup k mikrofonu.  
+- **pitch detection libraries** – rozpoznávání tónů pro ladění.  
+- **provider / riverpod** – správa stavů aplikace.  
+- **sqflite** – databáze pro ukládání akordů a video odkazů.  
+- **Firebase (volitelně)** – cloudové úložiště pro videa.  
+
+---
+
+## 📂 Struktura aplikace
