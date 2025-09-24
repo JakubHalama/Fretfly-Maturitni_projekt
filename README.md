@@ -1,6 +1,6 @@
 # 🎸 Fretfly – Flutter aplikace pro kytaristy
 
-> Maturitní projekt – školní rok 2024/2025
+> Maturitní projekt – Jakub Halama
 
 ---
 
@@ -53,6 +53,4 @@ Cílem je vytvořit přehlednou a intuitivní aplikaci, která působí profesio
 - **sqflite** – databáze pro ukládání akordů a video odkazů.  
 - **Firebase (volitelně)** – cloudové úložiště pro videa.  
 
----
 
-## 📂 Struktura aplikace
