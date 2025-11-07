@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "890068535217",
+    "project_id": "fretfly-67cb0",
+    "storage_bucket": "fretfly-67cb0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:890068535217:android:10737f13221e5d742c9f90",
+        "android_client_info": {
+          "package_name": "com.fluttermapp.fretfly"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBbX0JAyk41QIbyFSfQrVmm8DeZVffBpns"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
