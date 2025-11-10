@@ -37,9 +37,9 @@ Cílem je vytvořit přehlednou a intuitivní aplikaci, která působí profesio
 ## 🎶 Hlavní funkce
 - **Tuner** – rozpoznávání tónů pomocí mikrofonu.  
 - **Metronom** – nastavení tempa, vizuální “klik” i zvuk.  
-- **Akordy** – databáze základních i rozšířených akordů s grafickými diagramy hmatníku.  
-- **Video tutoriály** – možnost nahrávání a přehrávání výukových videí.  
-- **Dark/Light režim** – profesionální vzhled aplikace.  
+- **Akordy** – databáze základních i rozšířených akordů s grafickými diagramy hmatníku. 
+- **Dark/Light režim** – profesionální vzhled aplikace.
+- **Login** - Funkční login systém přes Firebase.
 
 ---
 
@@ -49,8 +49,6 @@ Cílem je vytvořit přehlednou a intuitivní aplikaci, která působí profesio
 - **Git & GitHub** – správa verzí a dokumentace.  
 - **flutter_audio_capture** – přístup k mikrofonu.  
 - **pitch detection libraries** – rozpoznávání tónů pro ladění.  
-- **provider / riverpod** – správa stavů aplikace.  
-- **sqflite** – databáze pro ukládání akordů a video odkazů.  
-- **Firebase (volitelně)** – cloudové úložiště pro videa.  
+- **Firebase** – cloudové úložiště pro videa.  
 
 
