@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:fretfly/auth_service.dart';
 import 'package:fretfly/login_page.dart';
@@ -6,6 +7,9 @@ import 'package:fretfly/pages/metronome_page.dart';
 import 'package:fretfly/pages/tuner_page.dart';
 import 'package:fretfly/pages/chords_page.dart';
 import 'package:fretfly/pages/profile_page.dart';
+import 'package:fretfly/ui/app_theme.dart';
+import 'package:fretfly/services/learned_chords_service.dart';
+import 'package:fretfly/services/streak_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -18,6 +22,46 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _tabIndex = 2; // center Home
+  late final List<Map<String, String>> _tips;
+  late final int _tipIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    // Update streak on app start if already signed in
+    StreakService().updateOnLogin();
+    _tips = [
+      {
+        'title': 'Cvič pomalu a přesně',
+        'body': 'Rychlost přijde s přesností. Začni na 60 BPM a postupně zrychluj!',
+      },
+      {
+        'title': 'Pravidelnost je klíč',
+        'body': 'Raději 15 minut denně než 2 hodiny jednou týdně. Vytvoř si návyk.',
+      },
+      {
+        'title': 'Metronom je tvůj kamarád',
+        'body': 'Začni pomalu a teprve po zvládnutí rytmu zvyšuj BPM po 5.',
+      },
+      {
+        'title': 'Správné držení ruky',
+        'body': 'Prsty drž kolmo k hmatníku a hraj co nejblíže u pražce pro čistý tón.',
+      },
+      {
+        'title': 'Tlumení strun',
+        'body': 'Využívej pravou i levou ruku k tlumení nežádoucích strun pro čistý zvuk.',
+      },
+      {
+        'title': 'Opakuj obtížné úseky',
+        'body': 'Zaměř se na 1–2 problematické takty a trénuj je v krátkých smyčkách.',
+      },
+      {
+        'title': 'Trénuj výměny akordů',
+        'body': 'Vyber dvojici akordů a procvičuj plynulé přechody 2–3 minuty denně.',
+      },
+    ];
+    _tipIndex = Random().nextInt(_tips.length);
+  }
 
   Future<void> _logout(BuildContext context) async {
     await AuthService.instance.signOut();
@@ -47,78 +91,105 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildHomePage() {
     return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Hero Section
+          // Modern Hero Section with Brand Gradient
           Container(
             width: double.infinity,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  Theme.of(context).primaryColor,
-                  Theme.of(context).primaryColor.withOpacity(0.7),
-                ],
+                colors: [AppTheme.primaryBrand, AppTheme.secondaryBrand],
               ),
             ),
             child: SafeArea(
               bottom: false,
               child: Padding(
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.fromLTRB(24, 32, 24, 40),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Ahoj! 👋',
-                              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w300,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Ahoj! 👋',
+                                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  color: Colors.white.withOpacity(0.95),
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Pojďme hrát!',
-                              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
+                              const SizedBox(height: 8),
+                              Text(
+                                'Pojďme hrát!',
+                                style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: -0.5,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                        IconButton(
-                          onPressed: () => _logout(context),
-                          icon: const Icon(Icons.logout, color: Colors.white),
-                          tooltip: 'Odhlásit se',
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.3),
+                              width: 1.5,
+                            ),
+                          ),
+                          child: IconButton(
+                            onPressed: () => _logout(context),
+                            icon: const Icon(
+                              Icons.logout_rounded,
+                              color: Colors.white,
+                              size: 24,
+                            ),
+                            tooltip: 'Odhlásit se',
+                          ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 24),
-                    // Stats Cards
+                    const SizedBox(height: 32),
+                    // Modern Stats Cards
                     Row(
                       children: [
                         Expanded(
-                          child: _buildStatCard(
-                            icon: Icons.music_note,
-                            label: 'Naučených akordů',
-                            value: '12',
-                            color: Colors.white.withOpacity(0.9),
+                          child: StreamBuilder<int>(
+                            stream: LearnedChordsService().learnedCount(),
+                            builder: (context, snapshot) {
+                              final count = snapshot.data ?? 0;
+                              return _buildStatCard(
+                                icon: Icons.music_note_rounded,
+                                label: 'Naučených akordů',
+                                value: '$count',
+                                color: Theme.of(context).colorScheme.onPrimary,
+                              );
+                            },
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
-                          child: _buildStatCard(
-                            icon: Icons.timer_outlined,
-                            label: 'Dní v řadě',
-                            value: '5',
-                            color: Colors.white.withOpacity(0.9),
+                          child: StreamBuilder<int>(
+                            stream: StreakService().currentStreakStream(),
+                            builder: (context, snapshot) {
+                              final streak = snapshot.data ?? 0;
+                              return _buildStatCard(
+                                icon: Icons.local_fire_department_rounded,
+                                label: 'Dní v řadě',
+                                value: '$streak',
+                                color: Theme.of(context).colorScheme.onPrimary,
+                              );
+                            },
                           ),
                         ),
                       ],
@@ -129,30 +200,31 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 32),
 
-          // Quick Actions
+          // Quick Actions Section
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'Rychlé akce',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w800,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
                 Row(
                   children: [
                     Expanded(
                       child: _buildQuickActionCard(
                         context,
-                        icon: Icons.access_time_filled,
+                        icon: Icons.access_time_filled_rounded,
                         title: 'Metronom',
                         subtitle: 'Procvič rytmus',
-                        color: Colors.blue,
+                        color: AppTheme.primary,
                         onTap: () => setState(() => _tabIndex = 0),
                       ),
                     ),
@@ -160,10 +232,10 @@ class _HomePageState extends State<HomePage> {
                     Expanded(
                       child: _buildQuickActionCard(
                         context,
-                        icon: Icons.music_note,
+                        icon: Icons.tune_rounded,
                         title: 'Ladička',
                         subtitle: 'Nalaď kytaru',
-                        color: Colors.orange,
+                        color: AppTheme.secondary,
                         onTap: () => setState(() => _tabIndex = 1),
                       ),
                     ),
@@ -172,10 +244,10 @@ class _HomePageState extends State<HomePage> {
                 const SizedBox(height: 12),
                 _buildQuickActionCard(
                   context,
-                  icon: Icons.grid_view,
+                  icon: Icons.grid_view_rounded,
                   title: 'Knihovna akordů',
                   subtitle: 'Nauč se nové akordy',
-                  color: Colors.green,
+                  color: AppTheme.tertiaryBrand,
                   onTap: () => setState(() => _tabIndex = 3),
                   fullWidth: true,
                 ),
@@ -183,71 +255,73 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 32),
 
-          // Practice Tip
+          // Practice Tip - Modern Card
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'Tip dne',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w800,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(28),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.purple.shade400,
-                        Colors.purple.shade600,
-                      ],
+                    gradient: const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [AppTheme.primaryBrand, AppTheme.secondaryBrand],
                     ),
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(28),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.purple.withOpacity(0.3),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
+                        color: AppTheme.primaryBrand.withOpacity(0.4),
+                        blurRadius: 24,
+                        offset: const Offset(0, 8),
+                        spreadRadius: 0,
                       ),
                     ],
                   ),
                   child: Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(12),
+                        padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(12),
+                          color: Colors.white.withOpacity(0.25),
+                          borderRadius: BorderRadius.circular(16),
                         ),
                         child: const Icon(
-                          Icons.lightbulb_outline,
+                          Icons.lightbulb_rounded,
                           color: Colors.white,
-                          size: 32,
+                          size: 28,
                         ),
                       ),
-                      const SizedBox(width: 16),
+                      const SizedBox(width: 20),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Cvič pomalu a přesně',
+                              _tips[_tipIndex]['title'] ?? '',
                               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                 color: Colors.white,
-                                fontWeight: FontWeight.bold,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
-                            const SizedBox(height: 4),
+                            const SizedBox(height: 6),
                             Text(
-                              'Rychlost přijde s přesností. Začni na 60 BPM!',
+                              _tips[_tipIndex]['body'] ?? '',
                               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: Colors.white.withOpacity(0.9),
+                                color: Colors.white.withOpacity(0.95),
+                                height: 1.4,
                               ),
                             ),
                           ],
@@ -272,37 +346,69 @@ class _HomePageState extends State<HomePage> {
     required String value,
     required Color color,
   }) {
+    final isOnPrimary = color == Colors.white || color == Theme.of(context).colorScheme.onPrimary;
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(16),
+        color: isOnPrimary
+            ? Colors.white.withOpacity(0.2)
+            : Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(24),
+        border: isOnPrimary
+            ? Border.all(
+                color: Colors.white.withOpacity(0.3),
+                width: 1.5,
+              )
+            : null,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: Colors.black.withOpacity(isOnPrimary ? 0.1 : 0.06),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+            spreadRadius: 0,
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: Theme.of(context).primaryColor, size: 28),
-          const SizedBox(height: 12),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).primaryColor,
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: isOnPrimary
+                  ? Colors.white.withOpacity(0.3)
+                  : AppTheme.primaryContainer,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(
+              icon,
+              color: isOnPrimary
+                  ? Colors.white
+                  : AppTheme.primary,
+              size: 28,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 20),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.displaySmall?.copyWith(
+              fontWeight: FontWeight.w800,
+              color: isOnPrimary
+                  ? Colors.white
+                  : AppTheme.primary,
+              letterSpacing: -0.5,
+            ),
+          ),
+          const SizedBox(height: 8),
           Text(
             label,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Colors.grey[700],
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: isOnPrimary
+                  ? Colors.white.withOpacity(0.9)
+                  : Theme.of(context).colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w600,
             ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
@@ -318,83 +424,128 @@ class _HomePageState extends State<HomePage> {
     required VoidCallback onTap,
     bool fullWidth = false,
   }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: color.withOpacity(0.3),
-            width: 1.5,
-          ),
-        ),
-        child: fullWidth
-            ? Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: color,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(icon, color: Colors.white, size: 28),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: color,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          subtitle,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Icon(Icons.arrow_forward_ios, color: color, size: 18),
-                ],
-              )
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: color,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(icon, color: Colors.white, size: 28),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    title,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: color,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                ],
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: color.withOpacity(0.2),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.06),
+                blurRadius: 16,
+                offset: const Offset(0, 4),
+                spreadRadius: 0,
               ),
+            ],
+          ),
+          child: fullWidth
+              ? Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            color,
+                            color.withOpacity(0.8),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: color.withOpacity(0.3),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Icon(icon, color: Colors.white, size: 28),
+                    ),
+                    const SizedBox(width: 20),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            subtitle,
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      color: color,
+                      size: 20,
+                    ),
+                  ],
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            color,
+                            color.withOpacity(0.8),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: color.withOpacity(0.3),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Icon(icon, color: Colors.white, size: 28),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      title,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      subtitle,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+        ),
       ),
     );
   }
@@ -420,42 +571,45 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
     return Scaffold(
-      appBar: _tabIndex == 2 ? null : AppBar(title: Text(_titleForIndex(_tabIndex))),
+      appBar: _tabIndex == 2 ? null : AppBar(
+        title: Text(_titleForIndex(_tabIndex)),
+        elevation: 0,
+      ),
       body: Stack(
         children: [
           _buildBody(),
-          // Floating pill nav bar
+          // Modern floating pill nav bar
           Positioned(
-            left: 16,
-            right: 16,
-            bottom: 16 + bottomPadding,
+            left: 20,
+            right: 20,
+            bottom: 20 + bottomPadding,
             child: _FloatingPillNavBar(
               currentIndex: _tabIndex,
               onTap: (i) => setState(() => _tabIndex = i),
               items: const [
                 _NavItem(
                   icon: Icons.access_time_outlined,
-                  selectedIcon: Icons.access_time_filled,
+                  selectedIcon: Icons.access_time_filled_rounded,
                   label: 'Metro',
                 ),
                 _NavItem(
-                  icon: Icons.music_note_outlined,
-                  selectedIcon: Icons.music_note,
+                  icon: Icons.tune_outlined,
+                  selectedIcon: Icons.tune_rounded,
                   label: 'Tuner',
                 ),
                 _NavItem(
                   icon: Icons.home_outlined,
-                  selectedIcon: Icons.home_filled,
+                  selectedIcon: Icons.home_rounded,
                   label: 'Home',
                 ),
                 _NavItem(
                   icon: Icons.grid_view_outlined,
-                  selectedIcon: Icons.grid_view,
+                  selectedIcon: Icons.grid_view_rounded,
                   label: 'Chords',
                 ),
                 _NavItem(
                   icon: Icons.person_outline,
-                  selectedIcon: Icons.person,
+                  selectedIcon: Icons.person_rounded,
                   label: 'Profile',
                 ),
               ],
@@ -480,26 +634,30 @@ class _FloatingPillNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(28),
+      borderRadius: BorderRadius.circular(32),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.8),
-            borderRadius: BorderRadius.circular(28),
+            color: Theme.of(context).colorScheme.surface.withOpacity(0.98),
+            borderRadius: BorderRadius.circular(32),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.08),
-                blurRadius: 24,
+                color: AppTheme.primaryBrand.withOpacity(0.15),
+                blurRadius: 40,
                 offset: const Offset(0, 10),
+                spreadRadius: 0,
               ),
             ],
-            border: Border.all(color: Colors.white.withOpacity(0.6)),
+            border: Border.all(
+              color: Theme.of(context).colorScheme.surface.withOpacity(0.9),
+              width: 2,
+            ),
           ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 for (int i = 0; i < items.length; i++)
                   _NavButton(
@@ -539,29 +697,38 @@ class _NavButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     return Expanded(
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(20),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-          decoration: BoxDecoration(
-            color: selected
-                ? colorScheme.primary.withOpacity(.12)
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                selected ? item.selectedIcon : item.icon,
-                size: 26,
-                color: selected ? colorScheme.primary : Colors.black87,
-              ),
-            ],
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(20),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeInOut,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              color: selected
+                  ? AppTheme.primary.withOpacity(0.15)
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 200),
+                  child: Icon(
+                    selected ? item.selectedIcon : item.icon,
+                    key: ValueKey(selected),
+                    size: 24,
+                    color: selected
+                        ? AppTheme.primary
+                        : Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

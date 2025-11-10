@@ -7,6 +7,7 @@ import 'package:fretfly/auth_service.dart';
 import 'package:fretfly/home_page.dart';
 import 'package:fretfly/signup_page.dart';
 import 'package:fretfly/validation.dart';
+import 'package:fretfly/ui/app_theme.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -179,160 +180,295 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 420),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const Icon(Icons.music_note, size: 64),
-                const SizedBox(height: 12),
-                Text(
-                  'Fretfly',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                const SizedBox(height: 24),
-                Form(
-                  key: _formKey,
-                  child: Column(
-                    children: [
-                      TextFormField(
-                        controller: _emailController,
-                        keyboardType: TextInputType.emailAddress,
-                        autofillHints: const [
-                          AutofillHints.username,
-                          AutofillHints.email,
-                        ],
-                        decoration: const InputDecoration(
-                          labelText: 'Email',
-                          hintText: 'you@example.com',
-                          prefixIcon: Icon(Icons.email_outlined),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [AppTheme.primaryBrand, AppTheme.secondaryBrand],
+          ),
+        ),
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.all(32),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 420),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(height: 40),
+                    // Modern logo section with white background
+                    Container(
+                      padding: const EdgeInsets.all(28),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.3),
+                          width: 2,
                         ),
-                        validator: Validators.email,
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _passwordController,
-                        obscureText: _isObscured,
-                        autofillHints: const [AutofillHints.password],
-                        decoration: InputDecoration(
-                          labelText: 'Password',
-                          prefixIcon: const Icon(Icons.lock_outline),
-                          suffixIcon: IconButton(
-                            onPressed: () => setState(() => _isObscured = !_isObscured),
-                            icon: Icon(
-                              _isObscured ? Icons.visibility : Icons.visibility_off,
-                            ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 20,
+                            offset: const Offset(0, 4),
                           ),
-                        ),
-                        validator: (value) => (value == null || value.isEmpty)
-                            ? 'Please enter your password'
-                            : null,
+                        ],
                       ),
-                      const SizedBox(height: 8),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(
-                          onPressed: () {},
-                          child: const Text('Forgot password?'),
-                        ),
+                      child: const Icon(
+                        Icons.music_note_rounded,
+                        size: 56,
+                        color: Colors.white,
                       ),
-                      const SizedBox(height: 8),
-                      SizedBox(
-                        width: double.infinity,
-                        child: FilledButton(
-                          onPressed: _isSubmitting ? null : _onSubmit,
-                          child: _isSubmitting
-                              ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
-                                )
-                              : const Text('Log in'),
-                        ),
+                    ),
+                    const SizedBox(height: 40),
+                    Text(
+                      'Vítej zpět!',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                            letterSpacing: -0.5,
+                          ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Přihlas se a pokračuj v učení',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: Colors.white.withOpacity(0.9),
+                            fontSize: 16,
+                          ),
+                    ),
+                    const SizedBox(height: 48),
+                    // White card with form
+                    Container(
+                      padding: const EdgeInsets.all(32),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(32),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 30,
+                            offset: const Offset(0, 10),
+                            spreadRadius: 0,
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 12),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Row(
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
                           children: [
-                            const Expanded(child: Divider()),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 12),
-                              child: Text(
-                                'or',
-                                style: TextStyle(
-                                  color: Colors.black.withOpacity(0.6),
-                                  fontWeight: FontWeight.w600,
+                            TextFormField(
+                              controller: _emailController,
+                              keyboardType: TextInputType.emailAddress,
+                              autofillHints: const [
+                                AutofillHints.username,
+                                AutofillHints.email,
+                              ],
+                              decoration: const InputDecoration(
+                                labelText: 'Email',
+                                hintText: 'you@example.com',
+                                prefixIcon: Icon(Icons.email_outlined),
+                              ),
+                              validator: Validators.email,
+                            ),
+                            const SizedBox(height: 20),
+                            TextFormField(
+                              controller: _passwordController,
+                              obscureText: _isObscured,
+                              autofillHints: const [AutofillHints.password],
+                              decoration: InputDecoration(
+                                labelText: 'Heslo',
+                                prefixIcon: const Icon(Icons.lock_outline),
+                                suffixIcon: IconButton(
+                                  onPressed: () => setState(() => _isObscured = !_isObscured),
+                                  icon: Icon(
+                                    _isObscured ? Icons.visibility : Icons.visibility_off,
+                                  ),
+                                ),
+                              ),
+                              validator: (value) => (value == null || value.isEmpty)
+                                  ? 'Prosím zadej heslo'
+                                  : null,
+                            ),
+                            const SizedBox(height: 20),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton(
+                                onPressed: () {},
+                                style: TextButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                ),
+                                child: Text(
+                                  'Zapomněl jsi heslo?',
+                                  style: TextStyle(
+                                    color: AppTheme.primary,
+                                    fontWeight: FontWeight.w700,
+                                  ),
                                 ),
                               ),
                             ),
-                            const Expanded(child: Divider()),
+                            const SizedBox(height: 28),
+                            SizedBox(
+                              width: double.infinity,
+                              height: 56,
+                              child: FilledButton(
+                                onPressed: _isSubmitting ? null : _onSubmit,
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: AppTheme.primary,
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                ),
+                                child: _isSubmitting
+                                    ? const SizedBox(
+                                        height: 24,
+                                        width: 24,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2.5,
+                                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                        ),
+                                      )
+                                    : const Text(
+                                        'Přihlásit se',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w700,
+                                          letterSpacing: 0.5,
+                                        ),
+                                      ),
+                              ),
+                            ),
+                            const SizedBox(height: 28),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Divider(
+                                    color: Colors.grey.shade300,
+                                    thickness: 1,
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                                  child: Text(
+                                    'nebo',
+                                    style: TextStyle(
+                                      color: AppTheme.mutedText,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Divider(
+                                    color: Colors.grey.shade300,
+                                    thickness: 1,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 28),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: OutlinedButton.icon(
+                                    onPressed: _isOauthSubmitting ? null : _onGoogle,
+                                    icon: Image.asset(
+                                      'assets/icons/google.png',
+                                      width: 20,
+                                      height: 20,
+                                    ),
+                                    label: const Text(
+                                      'Google',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                    style: OutlinedButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(vertical: 16),
+                                      side: BorderSide(
+                                        color: Colors.grey.shade300,
+                                        width: 1.5,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                if (Platform.isIOS)
+                                  Expanded(
+                                    child: OutlinedButton.icon(
+                                      onPressed: _isOauthSubmitting ? null : _onApple,
+                                      icon: Image.asset(
+                                        'assets/icons/apple.png',
+                                        width: 18,
+                                        height: 18,
+                                      ),
+                                      label: const Text(
+                                        'Apple',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                      style: OutlinedButton.styleFrom(
+                                        padding: const EdgeInsets.symmetric(vertical: 16),
+                                        side: BorderSide(
+                                          color: Colors.grey.shade300,
+                                          width: 1.5,
+                                        ),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(20),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
                           ],
                         ),
                       ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: _isOauthSubmitting ? null : _onGoogle,
-                        icon: Image.asset(
-                          'assets/icons/google.png',
-                          width: 20,
-                          height: 20,
-                        ),
-                        label: const Text('Google'),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                        ),
-                      ),
                     ),
-                    const SizedBox(width: 12),
-                    if (Platform.isIOS)
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: _isOauthSubmitting ? null : _onApple,
-                          icon: Image.asset(
-                            'assets/icons/apple.png',
-                            width: 18,
-                            height: 18,
+                    const SizedBox(height: 32),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Nemáš účet? ',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.9),
+                            fontSize: 16,
                           ),
-                          label: const Text('Apple'),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pushNamed(SignUpPage.routeName),
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          ),
+                          child: const Text(
+                            'Registruj se',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 16,
+                              decoration: TextDecoration.underline,
+                              decorationThickness: 2,
                             ),
                           ),
                         ),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text("Don't have an account?"),
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pushNamed(SignUpPage.routeName),
-                      child: const Text('Sign up'),
+                      ],
                     ),
+                    const SizedBox(height: 20),
                   ],
                 ),
-              ],
+              ),
             ),
           ),
         ),

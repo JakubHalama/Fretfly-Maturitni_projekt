@@ -6,6 +6,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fretfly/ui/app_theme.dart';
+import 'package:fretfly/services/theme_service.dart';
+import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,14 +20,23 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Fretfly',
-      theme: AppTheme.light(),
-      home: const AuthGate(),
-      routes: {
-        SignUpPage.routeName: (context) => const SignUpPage(),
-        HomePage.routeName: (context) => const HomePage(),
-      },
+    return ChangeNotifierProvider(
+      create: (_) => ThemeService(),
+      child: Consumer<ThemeService>(
+        builder: (context, themeService, _) {
+          return MaterialApp(
+            title: 'Fretfly',
+            theme: AppTheme.light(),
+            darkTheme: AppTheme.dark(),
+            themeMode: themeService.themeMode,
+            home: const AuthGate(),
+            routes: {
+              SignUpPage.routeName: (context) => const SignUpPage(),
+              HomePage.routeName: (context) => const HomePage(),
+            },
+          );
+        },
+      ),
     );
   }
 }

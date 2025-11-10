@@ -93,17 +93,17 @@ class _EditProfilePageState extends State<EditProfilePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Upravit profil'),
-        backgroundColor: Theme.of(context).primaryColor,
-        foregroundColor: Colors.white,
+        elevation: 0,
       ),
       body: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.all(24),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Avatar
+              // Modern Avatar
               Center(
                 child: Stack(
                   children: [
@@ -112,11 +112,18 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       height: 120,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Theme.of(context).primaryColor.withOpacity(0.1),
+                        color: Theme.of(context).colorScheme.primaryContainer,
                         border: Border.all(
-                          color: Theme.of(context).primaryColor,
+                          color: Theme.of(context).colorScheme.primary,
                           width: 3,
                         ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                            blurRadius: 20,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
                       child: Center(
                         child: Text(
@@ -125,8 +132,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
                               : 'U',
                           style: TextStyle(
                             fontSize: 56,
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).primaryColor,
+                            fontWeight: FontWeight.w700,
+                            color: Theme.of(context).colorScheme.primary,
                           ),
                         ),
                       ),
@@ -135,17 +142,24 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       bottom: 0,
                       right: 0,
                       child: Container(
-                        padding: const EdgeInsets.all(8),
+                        padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor,
+                          color: Theme.of(context).colorScheme.primary,
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: Colors.white,
-                            width: 2,
+                            color: Theme.of(context).colorScheme.surface,
+                            width: 3,
                           ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
                         child: const Icon(
-                          Icons.camera_alt,
+                          Icons.camera_alt_rounded,
                           color: Colors.white,
                           size: 20,
                         ),
@@ -155,26 +169,22 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 ),
               ),
               
-              const SizedBox(height: 32),
+              const SizedBox(height: 40),
 
               // Jméno
               Text(
                 'Jméno',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.w700,
+                    ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 12),
               TextFormField(
                 controller: _nameController,
-                decoration: InputDecoration(
+                textCapitalization: TextCapitalization.words,
+                decoration: const InputDecoration(
                   hintText: 'Tvoje jméno',
-                  prefixIcon: const Icon(Icons.person_outline),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  filled: true,
-                  fillColor: Colors.grey[50],
+                  prefixIcon: Icon(Icons.person_outline_rounded),
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
@@ -194,24 +204,19 @@ class _EditProfilePageState extends State<EditProfilePage> {
               Text(
                 'Email',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.w700,
+                    ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 12),
               TextFormField(
                 initialValue: _user?.email ?? '',
                 enabled: false,
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.email_outlined),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  filled: true,
-                  fillColor: Colors.grey[100],
+                decoration: const InputDecoration(
+                  prefixIcon: Icon(Icons.email_outlined),
                 ),
               ),
 
-              const SizedBox(height: 32),
+              const SizedBox(height: 40),
 
               // Uložit tlačítko
               SizedBox(
@@ -220,9 +225,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 child: FilledButton(
                   onPressed: _isLoading ? null : _saveProfile,
                   style: FilledButton.styleFrom(
-                    backgroundColor: Theme.of(context).primaryColor,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                   ),
                   child: _isLoading
@@ -231,14 +235,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
                           height: 24,
                           child: CircularProgressIndicator(
                             color: Colors.white,
-                            strokeWidth: 2,
+                            strokeWidth: 2.5,
                           ),
                         )
                       : const Text(
                           'Uložit změny',
                           style: TextStyle(
                             fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.5,
                           ),
                         ),
                 ),

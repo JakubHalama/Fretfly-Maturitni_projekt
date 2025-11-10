@@ -71,89 +71,110 @@ class _SignUpPageState extends State<SignUpPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Sign up')),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 420),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  TextFormField(
-                    controller: _nameController,
-                    textCapitalization: TextCapitalization.words,
-                    decoration: const InputDecoration(
-                      labelText: 'Name',
-                      prefixIcon: Icon(Icons.person_outline),
+      appBar: AppBar(
+        title: const Text('Registrace'),
+        elevation: 0,
+      ),
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.all(32),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 420),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(height: 20),
+                    Text(
+                      'Vytvoř si účet',
+                      style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
                     ),
-                    validator: (v) {
-                      if (v == null || v.trim().isEmpty) {
-                        return 'Please enter your name';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    autofillHints: const [AutofillHints.email],
-                    decoration: const InputDecoration(
-                      labelText: 'Email',
-                      hintText: 'you@example.com',
-                      prefixIcon: Icon(Icons.email_outlined),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Začni svou cestu s kytarou',
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
                     ),
-                    validator: Validators.email,
-                  ),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: _passwordController,
-                    obscureText: _isObscured,
-                    autofillHints: const [AutofillHints.newPassword],
-                    decoration: InputDecoration(
-                      labelText: 'Password',
-                      helperText:
-                          'Min 8 chars with upper, lower, number and special character',
-                      prefixIcon: const Icon(Icons.lock_outline),
-                      suffixIcon: IconButton(
-                        onPressed: () =>
-                            setState(() => _isObscured = !_isObscured),
-                        icon: Icon(
-                          _isObscured ? Icons.visibility : Icons.visibility_off,
+                    const SizedBox(height: 32),
+                    TextFormField(
+                      controller: _nameController,
+                      textCapitalization: TextCapitalization.words,
+                      decoration: const InputDecoration(
+                        labelText: 'Name',
+                        prefixIcon: Icon(Icons.person_outline),
+                      ),
+                      validator: (v) {
+                        if (v == null || v.trim().isEmpty) {
+                          return 'Please enter your name';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    TextFormField(
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      autofillHints: const [AutofillHints.email],
+                      decoration: const InputDecoration(
+                        labelText: 'Email',
+                        hintText: 'vas@email.com',
+                        prefixIcon: Icon(Icons.email_outlined),
+                      ),
+                      validator: Validators.email,
+                    ),
+                    const SizedBox(height: 20),
+                    TextFormField(
+                      controller: _passwordController,
+                      obscureText: _isObscured,
+                      autofillHints: const [AutofillHints.newPassword],
+                      decoration: InputDecoration(
+                        labelText: 'Heslo',
+                        helperText:
+                            'Min. 8 znaků, velké písmeno, číslo a speciální znak',
+                        prefixIcon: const Icon(Icons.lock_outline),
+                        suffixIcon: IconButton(
+                          onPressed: () =>
+                              setState(() => _isObscured = !_isObscured),
+                          icon: Icon(
+                            _isObscured ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                          ),
                         ),
                       ),
+                      validator: Validators.strongPassword,
                     ),
-                    validator: Validators.strongPassword,
-                  ),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: _confirmController,
-                    obscureText: _isObscured,
-                    decoration: const InputDecoration(
-                      labelText: 'Confirm password',
-                      prefixIcon: Icon(Icons.lock_outline),
+                    const SizedBox(height: 20),
+                    TextFormField(
+                      controller: _confirmController,
+                      obscureText: _isObscured,
+                      decoration: const InputDecoration(
+                        labelText: 'Potvrď heslo',
+                        prefixIcon: Icon(Icons.lock_outline),
+                      ),
+                      validator: (v) =>
+                          Validators.confirmPassword(v, _passwordController.text),
                     ),
-                    validator: (v) =>
-                        Validators.confirmPassword(v, _passwordController.text),
-                  ),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton(
-                      onPressed: _isSubmitting ? null : _onSubmit,
-                      child: _isSubmitting
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Text('Create account'),
+                    const SizedBox(height: 32),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton(
+                        onPressed: _isSubmitting ? null : _onSubmit,
+                        child: _isSubmitting
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Text('Create account'),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

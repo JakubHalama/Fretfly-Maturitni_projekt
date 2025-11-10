@@ -1,6 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+import 'services/streak_service.dart';
 
 class AuthService {
   AuthService._();
@@ -34,6 +35,7 @@ class AuthService {
         email: email.trim(),
         password: password,
       );
+      await StreakService().updateOnLogin();
       final p = await _prefs;
       await p.setString(
         _keyCurrentUser,
@@ -50,6 +52,7 @@ class AuthService {
         email: email.trim(),
         password: password,
       );
+      await StreakService().updateOnLogin();
       final p = await _prefs;
       await p.setString(
         _keyCurrentUser,
@@ -65,6 +68,7 @@ class AuthService {
       final credential = await FirebaseAuth.instance.signInWithProvider(
         GoogleAuthProvider(),
       );
+      await StreakService().updateOnLogin();
       final p = await _prefs;
       await p.setString(
         _keyCurrentUser,
@@ -125,6 +129,7 @@ class AuthService {
       await p.setString(_keyCurrentUser, userCredential.user?.email ?? '');
 
       print('Apple Sign-In successful!');
+      await StreakService().updateOnLogin();
     } on SignInWithAppleAuthorizationException catch (e) {
       print('Apple Sign-In Authorization Exception: ${e.code} - ${e.message}');
       if (e.code == AuthorizationErrorCode.canceled) return; // user cancelled

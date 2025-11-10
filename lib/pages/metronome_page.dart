@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:fretfly/ui/app_theme.dart';
 
 class MetronomePage extends StatefulWidget {
   const MetronomePage({super.key});
@@ -176,219 +177,308 @@ class _MetronomePageState extends State<MetronomePage> with SingleTickerProvider
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Metronom'),
-        backgroundColor: Theme.of(context).primaryColor,
-        foregroundColor: Colors.white,
-      ),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ScaleTransition(
-                scale: _scaleAnimation,
-                child: Container(
-                  width: 200,
-                  height: 200,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: _isPlaying 
-                        ? (_currentBeat == 1 
-                            ? Theme.of(context).primaryColor 
-                            : Theme.of(context).primaryColor.withOpacity(0.6))
-                        : Colors.grey[300],
-                    boxShadow: _isPlaying
-                        ? [
-                            BoxShadow(
-                              color: Theme.of(context).primaryColor.withOpacity(0.5),
-                              blurRadius: 20,
-                              spreadRadius: 5,
-                            ),
-                          ]
-                        : [],
-                  ),
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          '$_bpm',
-                          style: TextStyle(
-                            fontSize: 64,
-                            fontWeight: FontWeight.bold,
-                            color: _isPlaying ? Colors.white : Colors.grey[600],
+    return Center(
+      child: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ScaleTransition(
+              scale: _scaleAnimation,
+              child: Container(
+                width: 220,
+                height: 220,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: _isPlaying 
+                      ? LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: _currentBeat == 1
+                              ? [AppTheme.primaryBrand, AppTheme.secondaryBrand]
+                              : [
+                                  AppTheme.primaryBrand.withOpacity(0.7),
+                                  AppTheme.secondaryBrand.withOpacity(0.5),
+                                ],
+                        )
+                      : null,
+                  color: _isPlaying ? null : AppTheme.surfaceVariant,
+                  boxShadow: _isPlaying
+                      ? [
+                          BoxShadow(
+                            color: AppTheme.primaryBrand.withOpacity(0.5),
+                            blurRadius: 40,
+                            spreadRadius: 10,
                           ),
-                        ),
-                        Text(
-                          'BPM',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w500,
-                            color: _isPlaying ? Colors.white : Colors.grey[600],
+                        ]
+                      : [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
                           ),
+                        ],
+                ),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        '$_bpm',
+                        style: TextStyle(
+                          fontSize: 72,
+                          fontWeight: FontWeight.w700,
+                          color: _isPlaying 
+                              ? Colors.white 
+                              : AppTheme.mutedText,
+                          letterSpacing: -2,
                         ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'BPM',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: _isPlaying 
+                              ? Colors.white.withOpacity(0.9)
+                              : AppTheme.mutedText,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-              
-              const SizedBox(height: 16),
-              
-              if (_isPlaying) ...[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(_beatsPerBar, (index) {
-                    final beatNumber = index + 1;
-                    return Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                      width: 12,
-                      height: 12,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: beatNumber == _currentBeat
-                            ? Theme.of(context).primaryColor
-                            : Colors.grey[300],
-                      ),
-                    );
-                  }),
-                ),
-                const SizedBox(height: 24),
-              ],
-              
-              const SizedBox(height: 32),
-              
+            ),
+            
+            const SizedBox(height: 16),
+            
+            if (_isPlaying) ...[
+              const SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  IconButton.filled(
-                    onPressed: () => _changeBpm(-1),
-                    icon: const Icon(Icons.remove),
-                    iconSize: 32,
-                  ),
-                  const SizedBox(width: 24),
-                  SizedBox(
-                    width: 150,
-                    child: Column(
-                      children: [
-                        Slider(
-                          value: _bpm.toDouble(),
-                          min: 40,
-                          max: 240,
-                          divisions: 200,
-                          label: '$_bpm BPM',
-                          onChanged: (value) {
-                            setState(() {
-                              _bpm = value.round();
-                              if (_isPlaying) {
-                                _stopMetronome();
-                                _startMetronome();
-                              }
-                            });
-                          },
-                        ),
-                        Text(
-                          '$_bpm BPM',
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                      ],
+                children: List.generate(_beatsPerBar, (index) {
+                  final beatNumber = index + 1;
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 100),
+                    margin: const EdgeInsets.symmetric(horizontal: 6),
+                    width: beatNumber == _currentBeat ? 14 : 10,
+                    height: beatNumber == _currentBeat ? 14 : 10,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: beatNumber == _currentBeat
+                          ? AppTheme.primary
+                          : AppTheme.surfaceVariant,
+                      boxShadow: beatNumber == _currentBeat
+                          ? [
+                              BoxShadow(
+                                color: AppTheme.primaryBrand.withOpacity(0.6),
+                                blurRadius: 12,
+                                spreadRadius: 3,
+                              ),
+                            ]
+                          : null,
                     ),
-                  ),
-                  const SizedBox(width: 24),
-                  IconButton.filled(
-                    onPressed: () => _changeBpm(1),
-                    icon: const Icon(Icons.add),
-                    iconSize: 32,
+                  );
+                }),
+              ),
+              const SizedBox(height: 32),
+            ] else ...[
+              const SizedBox(height: 32),
+            ],
+            
+            // BPM Controls
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                borderRadius: BorderRadius.circular(28),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.06),
+                    blurRadius: 24,
+                    offset: const Offset(0, 4),
                   ),
                 ],
               ),
-              
-              const SizedBox(height: 32),
-              
-              Column(
+              child: Column(
                 children: [
-                  Text(
-                    'Takt',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Colors.grey[700],
-                    ),
-                  ),
-                  const SizedBox(height: 12),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _buildTimeSignatureButton(2),
+                      IconButton.filled(
+                        onPressed: () => _changeBpm(-1),
+                        icon: const Icon(Icons.remove_rounded),
+                        iconSize: 24,
+                        style: IconButton.styleFrom(
+                          backgroundColor: AppTheme.surfaceVariant,
+                          foregroundColor: AppTheme.primaryText,
+                        ),
+                      ),
                       const SizedBox(width: 12),
-                      _buildTimeSignatureButton(3),
+                      Expanded(
+                        child: Column(
+                          children: [
+                            Slider(
+                              value: _bpm.toDouble(),
+                              min: 40,
+                              max: 240,
+                              divisions: 200,
+                              label: '$_bpm BPM',
+                              activeColor: AppTheme.primary,
+                              onChanged: (value) {
+                                setState(() {
+                                  _bpm = value.round();
+                                  if (_isPlaying) {
+                                    _stopMetronome();
+                                    _startMetronome();
+                                  }
+                                });
+                              },
+                            ),
+                            Text(
+                              '$_bpm BPM',
+                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ),
                       const SizedBox(width: 12),
-                      _buildTimeSignatureButton(4),
-                      const SizedBox(width: 12),
-                      _buildTimeSignatureButton(6),
+                      IconButton.filled(
+                        onPressed: () => _changeBpm(1),
+                        icon: const Icon(Icons.add_rounded),
+                        iconSize: 24,
+                        style: IconButton.styleFrom(
+                          backgroundColor: AppTheme.surfaceVariant,
+                          foregroundColor: AppTheme.primaryText,
+                        ),
+                      ),
                     ],
                   ),
                 ],
               ),
-              
-              const SizedBox(height: 40),
-              
-              SizedBox(
-                width: 200,
-                height: 60,
-                child: FilledButton.icon(
-                  onPressed: _startStop,
-                  icon: Icon(
-                    _isPlaying ? Icons.stop : Icons.play_arrow,
-                    size: 32,
+            ),
+            
+            const SizedBox(height: 32),
+            
+            // Time Signature
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                borderRadius: BorderRadius.circular(28),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.06),
+                    blurRadius: 24,
+                    offset: const Offset(0, 4),
                   ),
-                  label: Text(
-                    _isPlaying ? 'STOP' : 'START',
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                ],
+              ),
+              child: Column(
+                children: [
+                  Text(
+                    'Takt',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: AppTheme.primaryText,
+                        ),
+                  ),
+                  const SizedBox(height: 16),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _buildTimeSignatureButton(2),
+                        const SizedBox(width: 8),
+                        _buildTimeSignatureButton(3),
+                        const SizedBox(width: 8),
+                        _buildTimeSignatureButton(4),
+                        const SizedBox(width: 8),
+                        _buildTimeSignatureButton(6),
+                      ],
                     ),
                   ),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: _isPlaying 
-                        ? Colors.red 
-                        : Theme.of(context).primaryColor,
+                ],
+              ),
+            ),
+            
+            const SizedBox(height: 32),
+            
+            // Main Control Button
+            SizedBox(
+              width: double.infinity,
+              height: 64,
+              child: FilledButton.icon(
+                onPressed: _startStop,
+                icon: Icon(
+                  _isPlaying ? Icons.stop_rounded : Icons.play_arrow_rounded,
+                  size: 28,
+                ),
+                label: Text(
+                  _isPlaying ? 'STOP' : 'START',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1,
+                  ),
+                ),
+                style: FilledButton.styleFrom(
+                  backgroundColor: _isPlaying 
+                      ? Theme.of(context).colorScheme.error
+                      : Theme.of(context).colorScheme.primary,
+                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24),
                   ),
                 ),
               ),
-              
-              const SizedBox(height: 24),
-              
-              OutlinedButton(
+            ),
+            
+            const SizedBox(height: 16),
+            
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: OutlinedButton.icon(
                 onPressed: _tapTempo,
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                  side: BorderSide(
-                    color: Theme.of(context).primaryColor,
-                    width: 2,
-                  ),
-                ),
-                child: const Text(
+                icon: const Icon(Icons.touch_app_rounded),
+                label: const Text(
                   'TAP TEMPO',
                   style: TextStyle(
                     fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Theme.of(context).colorScheme.primary,
+                  side: BorderSide(
+                    color: Theme.of(context).colorScheme.primary,
+                    width: 2,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24),
                   ),
                 ),
               ),
-              
-              const SizedBox(height: 16),
-              
-              Text(
-                'Klikej na TAP TEMPO v rytmu pro nastavení BPM',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.grey[600],
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
+            ),
+            
+            const SizedBox(height: 12),
+            
+            Text(
+              'Klikej na TAP TEMPO v rytmu pro nastavení BPM',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppTheme.mutedText,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
       ),
     );
@@ -400,20 +490,22 @@ class _MetronomePageState extends State<MetronomePage> with SingleTickerProvider
       label: Text(
         '$beats/4',
         style: TextStyle(
-          fontWeight: FontWeight.bold,
-          color: isSelected ? Colors.white : Theme.of(context).primaryColor,
+          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+          color: isSelected 
+              ? Colors.white 
+              : AppTheme.primary,
         ),
       ),
       selected: isSelected,
       onSelected: (selected) => _setTimeSignature(beats),
-      selectedColor: Theme.of(context).primaryColor,
-      backgroundColor: Colors.white,
+      selectedColor: AppTheme.primary,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       side: BorderSide(
-        color: Theme.of(context).primaryColor,
+        color: AppTheme.primary,
         width: 2,
       ),
       showCheckmark: false,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
     );
   }
 }

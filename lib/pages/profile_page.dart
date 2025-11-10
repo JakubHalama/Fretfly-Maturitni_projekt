@@ -6,6 +6,11 @@ import 'package:fretfly/login_page.dart';
 import 'package:fretfly/pages/edit_profile_page.dart';
 import 'package:fretfly/pages/notifications_settings_page.dart';
 import 'package:fretfly/pages/appearance_settings_page.dart';
+import 'package:fretfly/ui/app_theme.dart';
+import 'package:fretfly/services/streak_service.dart';
+import 'package:fretfly/services/chords_service.dart';
+import 'package:fretfly/ui/chord_widget.dart';
+import 'package:fretfly/models/chord.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -19,6 +24,11 @@ class _ProfilePageState extends State<ProfilePage> {
   String _displayName = '';
   String _email = '';
   bool _isLoading = true;
+  final CollectionReference<Map<String, dynamic>> _learnedRef =
+      FirebaseFirestore.instance
+          .collection('users')
+          .doc(FirebaseAuth.instance.currentUser?.uid)
+          .collection('learned_chords');
 
   @override
   void initState() {
@@ -27,7 +37,8 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _loadUserData() async {
-    if (_user == null) return;
+    final user = _user;
+    if (user == null) return;
 
     setState(() => _isLoading = true);
 
@@ -35,29 +46,29 @@ class _ProfilePageState extends State<ProfilePage> {
       // Získej data z Firestore
       final userDoc = await FirebaseFirestore.instance
           .collection('users')
-          .doc(_user!.uid)
+          .doc(user.uid)
           .get();
 
       if (userDoc.exists) {
         final data = userDoc.data();
         setState(() {
-          _displayName = data?['name'] ?? _user!.displayName ?? 'Uživatel';
-          _email = _user!.email ?? '';
+          _displayName = data?['name'] ?? user.displayName ?? 'Uživatel';
+          _email = user.email ?? '';
           _isLoading = false;
         });
       } else {
         // Fallback na Firebase Auth data
         setState(() {
-          _displayName = _user!.displayName ?? 'Uživatel';
-          _email = _user!.email ?? '';
+          _displayName = user.displayName ?? 'Uživatel';
+          _email = user.email ?? '';
           _isLoading = false;
         });
       }
     } catch (e) {
       debugPrint('Error loading user data: $e');
       setState(() {
-        _displayName = _user!.displayName ?? 'Uživatel';
-        _email = _user!.email ?? '';
+        _displayName = user.displayName ?? 'Uživatel';
+        _email = user.email ?? '';
         _isLoading = false;
       });
     }
@@ -77,7 +88,8 @@ class _ProfilePageState extends State<ProfilePage> {
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
             style: FilledButton.styleFrom(
-              backgroundColor: Colors.red,
+              backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Theme.of(context).colorScheme.onError,
             ),
             child: const Text('Odhlásit'),
           ),
@@ -95,6 +107,77 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  void _showChordDetail(Chord chord) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.75,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        builder: (context, scrollController) => Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 20,
+                offset: const Offset(0, -5),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              // Handle
+              Container(
+                margin: const EdgeInsets.only(top: 12),
+                width: 48,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(3),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 20, 24, 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Detail akordu',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close_rounded),
+                      onPressed: () => Navigator.pop(context),
+                      style: IconButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  controller: scrollController,
+                  physics: const BouncingScrollPhysics(),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                    child: ChordWidget(chord: chord, showDetails: true),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -104,17 +187,14 @@ class _ProfilePageState extends State<ProfilePage> {
     return SingleChildScrollView(
       child: Column(
         children: [
-          // Header with gradient
+          // Header with brand gradient
           Container(
             width: double.infinity,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  Theme.of(context).primaryColor,
-                  Theme.of(context).primaryColor.withOpacity(0.7),
-                ],
+                colors: [AppTheme.primaryBrand, AppTheme.secondaryBrand],
               ),
             ),
             child: SafeArea(
@@ -129,7 +209,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       height: 100,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.2),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withOpacity(0.1),
@@ -144,7 +224,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           style: TextStyle(
                             fontSize: 48,
                             fontWeight: FontWeight.bold,
-                            color: Theme.of(context).primaryColor,
+                            color: Theme.of(context).colorScheme.onPrimary,
                           ),
                         ),
                       ),
@@ -154,7 +234,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     Text(
                       _displayName,
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.onPrimary,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -163,7 +243,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     Text(
                       _email,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.white.withOpacity(0.9),
+                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.9),
                       ),
                     ),
                   ],
@@ -180,30 +260,180 @@ class _ProfilePageState extends State<ProfilePage> {
             child: Row(
               children: [
                 Expanded(
-                  child: _buildStatCard(
-                    icon: Icons.music_note,
-                    label: 'Naučených akordů',
-                    value: '12',
-                    color: Colors.blue,
+                  child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                    stream: _learnedRef.snapshots(),
+                    builder: (context, snapshot) {
+                      final count = snapshot.data?.docs.length ?? 0;
+                      return _buildStatCard(
+                        icon: Icons.music_note_rounded,
+                        label: 'Naučených akordů',
+                        value: '$count',
+                        color: AppTheme.primary,
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: StreamBuilder<int>(
+                    stream: StreakService().currentStreakStream(),
+                    builder: (context, snapshot) {
+                      final streak = snapshot.data ?? 0;
+                      return _buildStatCard(
+                        icon: Icons.local_fire_department_rounded,
+                        label: 'Dní v řadě',
+                        value: '$streak',
+                        color: AppTheme.secondary,
+                      );
+                    },
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: _buildStatCard(
-                    icon: Icons.local_fire_department,
-                    label: 'Dní v řadě',
-                    value: '5',
-                    color: Colors.orange,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildStatCard(
-                    icon: Icons.schedule,
+                    icon: Icons.schedule_rounded,
                     label: 'Hodin cvičení',
                     value: '24',
-                    color: Colors.green,
+                    color: AppTheme.tertiaryBrand,
                   ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 24),
+
+          // Naučené akordy
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Naučené akordy',
+                    textAlign: TextAlign.left,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                  stream: _learnedRef.orderBy('addedAt', descending: true).snapshots(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: Padding(
+                        padding: EdgeInsets.all(16),
+                        child: CircularProgressIndicator(),
+                      ));
+                    }
+                    final docs = snapshot.data?.docs ?? [];
+                    if (docs.isEmpty) {
+                      return Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surface,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.15),
+                          ),
+                        ),
+                        child: Text(
+                          'Zatím žádné naučené akordy.',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              ),
+                        ),
+                      );
+                    }
+                    return Column(
+                      children: docs.map((d) {
+                        final data = d.data();
+                        return Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: () async {
+                              final chord = await ChordsService().getChord(d.id);
+                              if (chord == null) {
+                                if (!mounted) return;
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Akord nebyl nalezen')),
+                                );
+                                return;
+                              }
+                              if (!mounted) return;
+                              _showChordDetail(chord);
+                            },
+                            borderRadius: BorderRadius.circular(16),
+                            child: Container(
+                              margin: const EdgeInsets.only(bottom: 8),
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.surface,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      gradient: const LinearGradient(
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                        colors: [AppTheme.primaryBrand, AppTheme.secondaryBrand],
+                                      ),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: const Icon(Icons.music_note_rounded, color: Colors.white),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          data['name'] ?? d.id,
+                                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                                fontWeight: FontWeight.w700,
+                                                color: Theme.of(context).colorScheme.onSurface,
+                                                height: 1.15,
+                                              ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          data['category'] ?? '',
+                                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                                height: 1.2,
+                                              ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  IconButton(
+                                    onPressed: () async {
+                                      await _learnedRef.doc(d.id).delete();
+                                    },
+                                    icon: Icon(
+                                      Icons.delete_outline,
+                                      color: Theme.of(context).colorScheme.error,
+                                    ),
+                                    tooltip: 'Odebrat',
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    );
+                  },
                 ),
               ],
             ),
@@ -220,7 +450,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 Text(
                   'Nastavení',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w800,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -316,19 +547,25 @@ class _ProfilePageState extends State<ProfilePage> {
               height: 56,
               child: OutlinedButton.icon(
                 onPressed: _logout,
-                icon: const Icon(Icons.logout, color: Colors.red),
-                label: const Text(
+                icon: Icon(
+                  Icons.logout_rounded,
+                  color: Theme.of(context).colorScheme.error,
+                ),
+                label: Text(
                   'Odhlásit se',
                   style: TextStyle(
                     fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.red,
+                    fontWeight: FontWeight.w700,
+                    color: Theme.of(context).colorScheme.error,
                   ),
                 ),
                 style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Colors.red, width: 2),
+                  side: BorderSide(
+                    color: Theme.of(context).colorScheme.error,
+                    width: 2,
+                  ),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(20),
                   ),
                 ),
               ),
@@ -347,36 +584,73 @@ class _ProfilePageState extends State<ProfilePage> {
     required String value,
     required Color color,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: color.withOpacity(0.3),
-          width: 1.5,
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 140),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: color.withOpacity(0.2),
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 16,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, color: color, size: 28),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: color,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    color,
+                    color.withOpacity(0.8),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: color.withOpacity(0.3),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Icon(icon, color: Colors.white, size: 28),
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Colors.grey[700],
+            const SizedBox(height: 16),
+            Text(
+              value,
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: color,
+                    letterSpacing: -0.5,
+                    height: 1.0,
+                  ),
             ),
-          ),
-        ],
+            const SizedBox(height: 8),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppTheme.secondaryText,
+                    fontWeight: FontWeight.w600,
+                    height: 1.2,
+                  ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -387,60 +661,85 @@ class _ProfilePageState extends State<ProfilePage> {
     required String subtitle,
     required VoidCallback onTap,
   }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.grey[50],
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: Colors.grey[200]!,
-            width: 1,
-          ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.2),
+                width: 1.5,
               ),
-              child: Icon(
-                icon,
-                color: Theme.of(context).primaryColor,
-                size: 24,
-              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.06),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [AppTheme.primary, AppTheme.secondary],
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.grey[600],
+                  borderRadius: BorderRadius.circular(18),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.primary.withOpacity(0.3),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
                     ),
-                  ),
-                ],
+                  ],
+                ),
+                child: Icon(
+                  icon,
+                  color: Colors.white,
+                  size: 24,
+                ),
               ),
-            ),
+              const SizedBox(width: 20),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            color: Theme.of(context).colorScheme.onSurface,
+                            height: 1.1,
+                          ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      subtitle,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w500,
+                            height: 1.3,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
             Icon(
-              Icons.arrow_forward_ios,
-              color: Colors.grey[400],
-              size: 18,
+              Icons.arrow_forward_ios_rounded,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              size: 20,
             ),
-          ],
+            ],
+          ),
         ),
       ),
     );

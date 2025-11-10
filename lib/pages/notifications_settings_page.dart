@@ -18,8 +18,7 @@ class _NotificationsSettingsPageState extends State<NotificationsSettingsPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Oznámení'),
-        backgroundColor: Theme.of(context).primaryColor,
-        foregroundColor: Colors.white,
+        elevation: 0,
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -50,7 +49,7 @@ class _NotificationsSettingsPageState extends State<NotificationsSettingsPage> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                tileColor: Colors.grey[50],
+                tileColor: Theme.of(context).colorScheme.surfaceVariant,
               ),
             ),
 
@@ -84,9 +83,8 @@ class _NotificationsSettingsPageState extends State<NotificationsSettingsPage> {
                 Navigator.pop(context);
               },
               style: FilledButton.styleFrom(
-                backgroundColor: Theme.of(context).primaryColor,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                 ),
               ),
               child: const Text(
@@ -113,9 +111,11 @@ class _NotificationsSettingsPageState extends State<NotificationsSettingsPage> {
       padding: const EdgeInsets.only(bottom: 12),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.grey[50],
+          color: Theme.of(context).colorScheme.surfaceVariant,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey[200]!),
+          border: Border.all(
+            color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.2),
+          ),
         ),
         child: SwitchListTile(
           title: Text(
