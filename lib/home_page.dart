@@ -1,6 +1,7 @@
-import 'dart:ui';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fretfly/auth_service.dart';
 import 'package:fretfly/login_page.dart';
 import 'package:fretfly/pages/metronome_page.dart';
@@ -116,26 +117,54 @@ class _HomePageState extends State<HomePage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Ahoj! 👋',
-                                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                  color: Colors.white.withOpacity(0.95),
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Pojďme hrát!',
-                                style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: -0.5,
-                                ),
-                              ),
-                            ],
+                          child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                            stream: FirebaseAuth.instance.currentUser != null
+                                ? FirebaseFirestore.instance
+                                    .collection('users')
+                                    .doc(FirebaseAuth.instance.currentUser!.uid)
+                                    .snapshots()
+                                : null,
+                            builder: (context, snapshot) {
+                              final user = FirebaseAuth.instance.currentUser;
+                              String userName = 'Uživatel';
+                              
+                              if (snapshot.hasData && snapshot.data!.exists) {
+                                final data = snapshot.data!.data();
+                                userName = data?['name'] ?? user?.displayName ?? 'Uživatel';
+                              } else if (user != null) {
+                                userName = user.displayName ?? 'Uživatel';
+                              }
+                              
+                              // Pokud je jméno prázdné, použij první část emailu
+                              if (userName.isEmpty || userName == 'Uživatel') {
+                                final email = user?.email ?? '';
+                                if (email.isNotEmpty) {
+                                  userName = email.split('@')[0];
+                                }
+                              }
+                              
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Ahoj $userName! ',
+                                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                      color: Colors.white.withOpacity(0.95),
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Pojďme hrát!',
+                                    style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: -0.5,
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
                           ),
                         ),
                         Container(
@@ -334,7 +363,7 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
 
-          const SizedBox(height: 100), // Bottom padding for nav bar
+          const SizedBox(height: 24), // Bottom padding
         ],
       ),
     );
@@ -569,51 +598,40 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final bottomPadding = MediaQuery.of(context).padding.bottom;
     return Scaffold(
       appBar: _tabIndex == 2 ? null : AppBar(
         title: Text(_titleForIndex(_tabIndex)),
         elevation: 0,
       ),
-      body: Stack(
-        children: [
-          _buildBody(),
-          // Modern floating pill nav bar
-          Positioned(
-            left: 20,
-            right: 20,
-            bottom: 20 + bottomPadding,
-            child: _FloatingPillNavBar(
-              currentIndex: _tabIndex,
-              onTap: (i) => setState(() => _tabIndex = i),
-              items: const [
-                _NavItem(
-                  icon: Icons.access_time_outlined,
-                  selectedIcon: Icons.access_time_filled_rounded,
-                  label: 'Metro',
-                ),
-                _NavItem(
-                  icon: Icons.tune_outlined,
-                  selectedIcon: Icons.tune_rounded,
-                  label: 'Tuner',
-                ),
-                _NavItem(
-                  icon: Icons.home_outlined,
-                  selectedIcon: Icons.home_rounded,
-                  label: 'Home',
-                ),
-                _NavItem(
-                  icon: Icons.grid_view_outlined,
-                  selectedIcon: Icons.grid_view_rounded,
-                  label: 'Chords',
-                ),
-                _NavItem(
-                  icon: Icons.person_outline,
-                  selectedIcon: Icons.person_rounded,
-                  label: 'Profile',
-                ),
-              ],
-            ),
+      body: _buildBody(),
+      bottomNavigationBar: _BottomNavBar(
+        currentIndex: _tabIndex,
+        onTap: (i) => setState(() => _tabIndex = i),
+        items: const [
+          _NavItem(
+            icon: Icons.access_time_outlined,
+            selectedIcon: Icons.access_time_filled_rounded,
+            label: 'Metro',
+          ),
+          _NavItem(
+            icon: Icons.tune_outlined,
+            selectedIcon: Icons.tune_rounded,
+            label: 'Tuner',
+          ),
+          _NavItem(
+            icon: Icons.home_outlined,
+            selectedIcon: Icons.home_rounded,
+            label: 'Home',
+          ),
+          _NavItem(
+            icon: Icons.grid_view_outlined,
+            selectedIcon: Icons.grid_view_rounded,
+            label: 'Chords',
+          ),
+          _NavItem(
+            icon: Icons.person_outline,
+            selectedIcon: Icons.person_rounded,
+            label: 'Profile',
           ),
         ],
       ),
@@ -621,11 +639,11 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-class _FloatingPillNavBar extends StatelessWidget {
+class _BottomNavBar extends StatelessWidget {
   final int currentIndex;
   final void Function(int index) onTap;
   final List<_NavItem> items;
-  const _FloatingPillNavBar({
+  const _BottomNavBar({
     required this.currentIndex,
     required this.onTap,
     required this.items,
@@ -633,40 +651,30 @@ class _FloatingPillNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(32),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface.withOpacity(0.98),
-            borderRadius: BorderRadius.circular(32),
-            boxShadow: [
-              BoxShadow(
-                color: AppTheme.primaryBrand.withOpacity(0.15),
-                blurRadius: 40,
-                offset: const Offset(0, 10),
-                spreadRadius: 0,
-              ),
-            ],
-            border: Border.all(
-              color: Theme.of(context).colorScheme.surface.withOpacity(0.9),
-              width: 2,
-            ),
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, -2),
           ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                for (int i = 0; i < items.length; i++)
-                  _NavButton(
-                    item: items[i],
-                    selected: i == currentIndex,
-                    onPressed: () => onTap(i),
-                  ),
-              ],
-            ),
+        ],
+      ),
+      child: SafeArea(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              for (int i = 0; i < items.length; i++)
+                _NavButton(
+                  item: items[i],
+                  selected: i == currentIndex,
+                  onPressed: () => onTap(i),
+                ),
+            ],
           ),
         ),
       ),
@@ -702,19 +710,20 @@ class _NavButton extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: onPressed,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(12),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 250),
             curve: Curves.easeInOut,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
             decoration: BoxDecoration(
               color: selected
                   ? AppTheme.primary.withOpacity(0.15)
                   : Colors.transparent,
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(12),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 200),
@@ -726,6 +735,19 @@ class _NavButton extends StatelessWidget {
                         ? AppTheme.primary
                         : Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  item.label,
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                    color: selected
+                        ? AppTheme.primary
+                        : Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),

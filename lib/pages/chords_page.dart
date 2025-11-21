@@ -232,7 +232,7 @@ class _ChordsPageState extends State<ChordsPage> {
 
                   final chords = _applyFilters(chordsSnapshot.data!);
                   return ListView.builder(
-                    padding: const EdgeInsets.only(bottom: 100),
+                    padding: const EdgeInsets.only(bottom: 16),
                     itemCount: chords.length,
                     itemBuilder: (context, index) {
                       final chord = chords[index];

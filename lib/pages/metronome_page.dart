@@ -13,8 +13,8 @@ class MetronomePage extends StatefulWidget {
 
 class _MetronomePageState extends State<MetronomePage> with SingleTickerProviderStateMixin {
   // Audio players
-  final AudioPlayer _tickPlayer = AudioPlayer();
-  final AudioPlayer _tockPlayer = AudioPlayer();
+  final AudioPlayer _accentPlayer = AudioPlayer(); // Pro první dobu (vyšší pitch)
+  final AudioPlayer _regularPlayer = AudioPlayer(); // Pro ostatní doby (normální)
   
   // Metronome state
   bool _isPlaying = false;
@@ -45,13 +45,17 @@ class _MetronomePageState extends State<MetronomePage> with SingleTickerProvider
 
   Future<void> _loadSounds() async {
     try {
-      // Načti zvuky z assets
-      await _tickPlayer.setAsset('assets/sounds/sound-effect-hd.mp3');
-      await _tockPlayer.setAsset('assets/sounds/sound-effect-hd.mp3');
+      // Načti stejný zvuk pro oba playery
+      await _accentPlayer.setAsset('assets/sounds/sound-effect-hd.mp3');
+      await _regularPlayer.setAsset('assets/sounds/sound-effect-hd.mp3');
 
-      // Nastavení hlasitosti
-      await _tickPlayer.setVolume(1.0);
-      await _tockPlayer.setVolume(0.7);
+      // První doba: vyšší pitch (rychlejší přehrávání = vyšší tón)
+      await _accentPlayer.setVolume(1.0);
+      await _accentPlayer.setSpeed(2.0); // Vyšší pitch
+      
+      // Ostatní doby: normální pitch
+      await _regularPlayer.setVolume(0.7);
+      await _regularPlayer.setSpeed(1.0); // Normální pitch
       
       debugPrint('Sounds loaded successfully');
     } catch (e) {
@@ -62,8 +66,8 @@ class _MetronomePageState extends State<MetronomePage> with SingleTickerProvider
   @override
   void dispose() {
     _timer?.cancel();
-    _tickPlayer.dispose();
-    _tockPlayer.dispose();
+    _accentPlayer.dispose();
+    _regularPlayer.dispose();
     _animationController.dispose();
     super.dispose();
   }
@@ -104,17 +108,17 @@ class _MetronomePageState extends State<MetronomePage> with SingleTickerProvider
     // Animace
     _animationController.forward(from: 0.0);
     
-    // Přehraj tick zvuk
+    // Přehraj správný zvuk podle doby
     try {
       if (_currentBeat == 1) {
-        // První doba - vyšší zvuk
-        await _tickPlayer.seek(Duration.zero);
-        _tickPlayer.play();
+        // PRVNÍ DOBA - vyšší pitch (speed 2.0)
+        await _accentPlayer.seek(Duration.zero);
+        _accentPlayer.play();
         HapticFeedback.mediumImpact();
       } else {
-        // Ostatní doby - nižší zvuk
-        await _tockPlayer.seek(Duration.zero);
-        _tockPlayer.play();
+        // OSTATNÍ DOBY - normální pitch (speed 1.0)
+        await _regularPlayer.seek(Duration.zero);
+        _regularPlayer.play();
         HapticFeedback.lightImpact();
       }
     } catch (e) {
@@ -177,10 +181,16 @@ class _MetronomePageState extends State<MetronomePage> with SingleTickerProvider
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.all(32),
+    return SingleChildScrollView(
+      physics: const ClampingScrollPhysics(), // Zabraňuje bounce efektu
+      padding: const EdgeInsets.all(32),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minHeight: MediaQuery.of(context).size.height - 
+                    MediaQuery.of(context).padding.top - 
+                    MediaQuery.of(context).padding.bottom - 
+                    64, // Výška paddingu
+        ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -478,6 +488,7 @@ class _MetronomePageState extends State<MetronomePage> with SingleTickerProvider
                   ),
               textAlign: TextAlign.center,
             ),
+            const SizedBox(height: 24), // Bottom padding
           ],
         ),
       ),
