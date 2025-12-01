@@ -79,6 +79,7 @@ flutter:
     - assets/icons/apple.png
     - assets/sounds/sound-effect-hd.mp3
     - assets/sounds/metronome.mp3
+    - assets/logo/logo-fretfly.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

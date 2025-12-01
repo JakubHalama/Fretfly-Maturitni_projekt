@@ -3,6 +3,7 @@ import '../models/chord.dart';
 import '../services/chords_service.dart';
 import '../services/learned_chords_service.dart';
 import '../ui/chord_widget.dart';
+import '../ui/app_theme.dart';
 
 class ChordsPage extends StatefulWidget {
   const ChordsPage({super.key});
@@ -117,8 +118,13 @@ class _ChordsPageState extends State<ChordsPage> {
                 borderSide: BorderSide.none,
               ),
               filled: true,
-              fillColor: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              fillColor: Theme.of(
+                context,
+              ).colorScheme.surfaceVariant.withOpacity(0.3),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 16,
+              ),
             ),
             onChanged: (value) => setState(() {}),
           ),
@@ -131,29 +137,56 @@ class _ChordsPageState extends State<ChordsPage> {
             scrollDirection: Axis.horizontal,
             physics: const BouncingScrollPhysics(),
             child: Row(
-              children: _tones
-                  .map(
-                    (tone) => Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: FilterChip(
-                        label: Text(
-                          tone,
-                          style: TextStyle(
-                            fontWeight: _selectedRoot == tone
-                                ? FontWeight.w600
-                                : FontWeight.w500,
-                          ),
+              children: _tones.map((tone) {
+                final isSelected = _selectedRoot == tone;
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectedRoot = tone;
+                      });
+                    },
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 180),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 18,
+                        vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        gradient: isSelected ? AppTheme.brandGradient : null,
+                        color: isSelected
+                            ? null
+                            : Theme.of(context).colorScheme.surfaceVariant,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: isSelected
+                            ? [
+                                BoxShadow(
+                                  color: AppTheme.primaryBrand.withOpacity(
+                                    0.18,
+                                  ),
+                                  blurRadius: 10,
+                                  spreadRadius: 1,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ]
+                            : null,
+                      ),
+                      child: Text(
+                        tone,
+                        style: TextStyle(
+                          fontWeight: isSelected
+                              ? FontWeight.w700
+                              : FontWeight.w500,
+                          color: isSelected
+                              ? Colors.white
+                              : Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
-                        selected: _selectedRoot == tone,
-                        onSelected: (selected) {
-                          setState(() {
-                            _selectedRoot = tone;
-                          });
-                        },
                       ),
                     ),
-                  )
-                  .toList(),
+                  ),
+                );
+              }).toList(),
             ),
           ),
         ),
@@ -167,7 +200,8 @@ class _ChordsPageState extends State<ChordsPage> {
               return StreamBuilder<List<Chord>>(
                 stream: _getChordsStream(),
                 builder: (context, chordsSnapshot) {
-                  if (chordsSnapshot.connectionState == ConnectionState.waiting) {
+                  if (chordsSnapshot.connectionState ==
+                      ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
                   }
                   if (chordsSnapshot.hasError) {
@@ -238,7 +272,10 @@ class _ChordsPageState extends State<ChordsPage> {
                       final chord = chords[index];
                       final isLearned = learnedIds.contains(chord.id);
                       return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
@@ -251,7 +288,10 @@ class _ChordsPageState extends State<ChordsPage> {
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(20),
                                   side: BorderSide(
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.15),
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant
+                                        .withOpacity(0.15),
                                     width: 1,
                                   ),
                                 ),
@@ -265,73 +305,118 @@ class _ChordsPageState extends State<ChordsPage> {
                             ConstrainedBox(
                               constraints: const BoxConstraints(minHeight: 48),
                               child: isLearned
-                                  ? OutlinedButton.icon(
-                                      onPressed: () async {
-                                        await _learnedService.setLearned(chord, learned: false);
-                                        if (!mounted) return;
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(
-                                            content: Text('Odebráno z naučených: ${chord.name}'),
-                                            behavior: SnackBarBehavior.floating,
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(12),
+                                  ? DecoratedBox(
+                                      decoration: BoxDecoration(
+                                        gradient: AppTheme.brandGradient,
+                                        borderRadius: BorderRadius.circular(14),
+                                      ),
+                                      child: OutlinedButton.icon(
+                                        onPressed: () async {
+                                          await _learnedService.setLearned(
+                                            chord,
+                                            learned: false,
+                                          );
+                                          if (!mounted) return;
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                'Odebráno z naučených: ${chord.name}',
+                                              ),
+                                              behavior:
+                                                  SnackBarBehavior.floating,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        icon: const Icon(
+                                          Icons.check_circle_rounded,
+                                        ),
+                                        label: const Text(
+                                          'Odebrat z naučených',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        style: OutlinedButton.styleFrom(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                            vertical: 14,
+                                          ),
+                                          textStyle: const TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
+                                            letterSpacing: 0.2,
+                                          ),
+                                          backgroundColor: Colors.transparent,
+                                          foregroundColor: Colors.white,
+                                          side: BorderSide.none,
+                                          shadowColor: Colors.transparent,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              14,
                                             ),
                                           ),
-                                        );
-                                      },
-                                      icon: const Icon(Icons.check_circle_rounded),
-                                      label: const Text(
-                                        'Odebrat z naučených',
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      style: OutlinedButton.styleFrom(
-                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                                        textStyle: const TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w600,
-                                          letterSpacing: 0.2,
-                                        ),
-                                        foregroundColor: Theme.of(context).colorScheme.primary,
-                                        side: BorderSide(
-                                          color: Theme.of(context).colorScheme.primary,
-                                          width: 1.5,
-                                        ),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(14),
                                         ),
                                       ),
                                     )
-                                  : FilledButton.icon(
-                                      onPressed: () async {
-                                        await _learnedService.setLearned(chord, learned: true);
-                                        if (!mounted) return;
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(
-                                            content: Text('🎉 Super! ${chord.name} naučen!'),
-                                            backgroundColor: Colors.green,
-                                            behavior: SnackBarBehavior.floating,
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(12),
+                                  : DecoratedBox(
+                                      decoration: BoxDecoration(
+                                        gradient: AppTheme.brandGradient,
+                                        borderRadius: BorderRadius.circular(14),
+                                      ),
+                                      child: FilledButton.icon(
+                                        onPressed: () async {
+                                          await _learnedService.setLearned(
+                                            chord,
+                                            learned: true,
+                                          );
+                                          if (!mounted) return;
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                '🎉 Super! ${chord.name} naučen!',
+                                              ),
+                                              backgroundColor: Colors.green,
+                                              behavior:
+                                                  SnackBarBehavior.floating,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        icon: const Icon(Icons.check_rounded),
+                                        label: const Text(
+                                          'Označit jako naučený',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        style: FilledButton.styleFrom(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                            vertical: 14,
+                                          ),
+                                          textStyle: const TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
+                                            letterSpacing: 0.2,
+                                          ),
+                                          backgroundColor: Colors.transparent,
+                                          foregroundColor: Colors.white,
+                                          shadowColor: Colors.transparent,
+                                          surfaceTintColor: Colors.transparent,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              14,
                                             ),
                                           ),
-                                        );
-                                      },
-                                      icon: const Icon(Icons.check_rounded),
-                                      label: const Text(
-                                        'Označit jako naučený',
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      style: FilledButton.styleFrom(
-                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                                        textStyle: const TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w600,
-                                          letterSpacing: 0.2,
-                                        ),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(14),
                                         ),
                                       ),
                                     ),
@@ -391,14 +476,16 @@ class _ChordsPageState extends State<ChordsPage> {
                     Text(
                       'Detail akordu',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                     IconButton(
                       icon: const Icon(Icons.close_rounded),
                       onPressed: () => Navigator.pop(context),
                       style: IconButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+                        backgroundColor: Theme.of(
+                          context,
+                        ).colorScheme.surfaceVariant,
                       ),
                     ),
                   ],

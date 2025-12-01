@@ -201,19 +201,21 @@ class _MetronomePageState extends State<MetronomePage> with SingleTickerProvider
                 height: 220,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: _isPlaying 
-                      ? LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: _currentBeat == 1
-                              ? [AppTheme.primaryBrand, AppTheme.secondaryBrand]
-                              : [
-                                  AppTheme.primaryBrand.withOpacity(0.7),
-                                  AppTheme.secondaryBrand.withOpacity(0.5),
-                                ],
-                        )
-                      : null,
-                  color: _isPlaying ? null : AppTheme.surfaceVariant,
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: _isPlaying
+                        ? (_currentBeat == 1
+                            ? [AppTheme.primaryBrand, AppTheme.secondaryBrand]
+                            : [
+                                AppTheme.primaryBrand.withOpacity(0.9),
+                                AppTheme.secondaryBrand.withOpacity(0.7),
+                              ])
+                        : [
+                            AppTheme.primaryBrand.withOpacity(0.85),
+                            AppTheme.secondaryBrand.withOpacity(0.85),
+                          ],
+                  ),
                   boxShadow: _isPlaying
                       ? [
                           BoxShadow(
@@ -239,9 +241,7 @@ class _MetronomePageState extends State<MetronomePage> with SingleTickerProvider
                         style: TextStyle(
                           fontSize: 72,
                           fontWeight: FontWeight.w700,
-                          color: _isPlaying 
-                              ? Colors.white 
-                              : AppTheme.mutedText,
+                          color: Colors.white,
                           letterSpacing: -2,
                         ),
                       ),
@@ -251,9 +251,7 @@ class _MetronomePageState extends State<MetronomePage> with SingleTickerProvider
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
-                          color: _isPlaying 
-                              ? Colors.white.withOpacity(0.9)
-                              : AppTheme.mutedText,
+                          color: Colors.white.withOpacity(0.9),
                         ),
                       ),
                     ],
@@ -317,13 +315,20 @@ class _MetronomePageState extends State<MetronomePage> with SingleTickerProvider
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      IconButton.filled(
-                        onPressed: () => _changeBpm(-1),
-                        icon: const Icon(Icons.remove_rounded),
-                        iconSize: 24,
-                        style: IconButton.styleFrom(
-                          backgroundColor: AppTheme.surfaceVariant,
-                          foregroundColor: AppTheme.primaryText,
+                      DecoratedBox(
+                        decoration: const BoxDecoration(
+                          gradient: AppTheme.brandGradient,
+                          shape: BoxShape.circle,
+                        ),
+                        child: IconButton.filled(
+                          onPressed: () => _changeBpm(-1),
+                          icon: const Icon(Icons.remove_rounded),
+                          iconSize: 24,
+                          style: IconButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            foregroundColor: Colors.white,
+                            shadowColor: Colors.transparent,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -357,13 +362,20 @@ class _MetronomePageState extends State<MetronomePage> with SingleTickerProvider
                         ),
                       ),
                       const SizedBox(width: 12),
-                      IconButton.filled(
-                        onPressed: () => _changeBpm(1),
-                        icon: const Icon(Icons.add_rounded),
-                        iconSize: 24,
-                        style: IconButton.styleFrom(
-                          backgroundColor: AppTheme.surfaceVariant,
-                          foregroundColor: AppTheme.primaryText,
+                      DecoratedBox(
+                        decoration: const BoxDecoration(
+                          gradient: AppTheme.brandGradient,
+                          shape: BoxShape.circle,
+                        ),
+                        child: IconButton.filled(
+                          onPressed: () => _changeBpm(1),
+                          icon: const Icon(Icons.add_rounded),
+                          iconSize: 24,
+                          style: IconButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            foregroundColor: Colors.white,
+                            shadowColor: Colors.transparent,
+                          ),
                         ),
                       ),
                     ],
@@ -421,30 +433,45 @@ class _MetronomePageState extends State<MetronomePage> with SingleTickerProvider
             const SizedBox(height: 32),
             
             // Main Control Button
-            SizedBox(
-              width: double.infinity,
-              height: 64,
-              child: FilledButton.icon(
-                onPressed: _startStop,
-                icon: Icon(
-                  _isPlaying ? Icons.stop_rounded : Icons.play_arrow_rounded,
-                  size: 28,
-                ),
-                label: Text(
-                  _isPlaying ? 'STOP' : 'START',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1,
+            DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: _isPlaying
+                    ? const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          AppTheme.secondaryBrand,
+                          AppTheme.primaryBrand,
+                        ],
+                      )
+                    : AppTheme.brandGradient,
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: SizedBox(
+                width: double.infinity,
+                height: 64,
+                child: FilledButton.icon(
+                  onPressed: _startStop,
+                  icon: Icon(
+                    _isPlaying ? Icons.stop_rounded : Icons.play_arrow_rounded,
+                    size: 28,
                   ),
-                ),
-                style: FilledButton.styleFrom(
-                  backgroundColor: _isPlaying 
-                      ? Theme.of(context).colorScheme.error
-                      : Theme.of(context).colorScheme.primary,
-                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(24),
+                  label: Text(
+                    _isPlaying ? 'STOP' : 'START',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    foregroundColor: Colors.white,
+                    shadowColor: Colors.transparent,
+                    surfaceTintColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
                   ),
                 ),
               ),
@@ -452,28 +479,33 @@ class _MetronomePageState extends State<MetronomePage> with SingleTickerProvider
             
             const SizedBox(height: 16),
             
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: OutlinedButton.icon(
-                onPressed: _tapTempo,
-                icon: const Icon(Icons.touch_app_rounded),
-                label: const Text(
-                  'TAP TEMPO',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.5,
+            DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: AppTheme.brandGradient,
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: OutlinedButton.icon(
+                  onPressed: _tapTempo,
+                  icon: const Icon(Icons.touch_app_rounded),
+                  label: const Text(
+                    'TAP TEMPO',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.5,
+                    ),
                   ),
-                ),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: Theme.of(context).colorScheme.primary,
-                  side: BorderSide(
-                    color: Theme.of(context).colorScheme.primary,
-                    width: 2,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(24),
+                  style: OutlinedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    foregroundColor: Colors.white,
+                    side: BorderSide.none,
+                    shadowColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
                   ),
                 ),
               ),

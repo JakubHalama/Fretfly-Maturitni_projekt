@@ -8,7 +8,8 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
@@ -16,7 +17,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   @override
   void initState() {
     super.initState();
-    
+
     _controller = AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
@@ -53,10 +54,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              AppTheme.primaryBrand,
-              AppTheme.secondaryBrand,
-            ],
+            colors: [AppTheme.primaryBrand, AppTheme.secondaryBrand],
           ),
         ),
         child: SafeArea(
@@ -74,29 +72,24 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                           scale: _scaleAnimation,
                           child: Column(
                             children: [
-                              // Ikona kytary nebo hudební nota
+                              const SizedBox(height: 100),
+                              // Logo aplikace
                               Container(
-                                width: 120,
-                                height: 120,
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.2),
+                                width: 260,
+                                height: 260,
+                                decoration: const BoxDecoration(
                                   shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.2),
-                                      blurRadius: 30,
-                                      offset: const Offset(0, 10),
-                                    ),
-                                  ],
                                 ),
-                                child: const Icon(
-                                  Icons.music_note_rounded,
-                                  size: 70,
-                                  color: Colors.white,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(130),
+                                  child: Image.asset(
+                                    'assets/logo/logo-fretfly.png',
+                                    fit: BoxFit.cover,
+                                  ),
                                 ),
                               ),
-                              const SizedBox(height: 32),
-                              
+                              const SizedBox(height: 16),
+
                               // Název aplikace s různými styly
                               RichText(
                                 text: const TextSpan(
@@ -105,7 +98,8 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                                       text: 'Fret',
                                       style: TextStyle(
                                         fontSize: 48,
-                                        fontWeight: FontWeight.w900, // Extra tučné
+                                        fontWeight:
+                                            FontWeight.w900, // Extra tučné
                                         color: Colors.white,
                                         letterSpacing: 2,
                                         shadows: [
@@ -121,7 +115,8 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                                       text: 'fly',
                                       style: TextStyle(
                                         fontSize: 48,
-                                        fontWeight: FontWeight.w500, // Medium - trochu tenčí
+                                        fontWeight: FontWeight
+                                            .w500, // Medium - trochu tenčí
                                         color: Colors.white,
                                         letterSpacing: 2,
                                         shadows: [
@@ -137,7 +132,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                                 ),
                               ),
                               const SizedBox(height: 8),
-                              
+
                               // Podtitulek
                               Text(
                                 'Tvůj kytarový pomocník',
@@ -152,9 +147,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                           ),
                         ),
                       ),
-                      
+
                       const SizedBox(height: 60),
-                      
+
                       // Loading indikátor
                       FadeTransition(
                         opacity: _fadeAnimation,
@@ -163,7 +158,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                           height: 40,
                           child: CircularProgressIndicator(
                             strokeWidth: 3,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
                           ),
                         ),
                       ),
@@ -171,7 +168,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                   ),
                 ),
               ),
-              
+
               // Version info dole
               Padding(
                 padding: const EdgeInsets.only(bottom: 32),

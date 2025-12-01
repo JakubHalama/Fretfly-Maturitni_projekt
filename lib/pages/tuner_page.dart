@@ -324,19 +324,16 @@ class _TunerPageState extends State<TunerPage> {
             Container(
               padding: const EdgeInsets.all(40),
               decoration: BoxDecoration(
-                gradient: _isRecording
-                    ? const LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          AppTheme.primaryBrand,
-                          AppTheme.secondaryBrand,
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: _isRecording
+                      ? const [AppTheme.primaryBrand, AppTheme.secondaryBrand]
+                      : [
+                          AppTheme.primaryBrand.withOpacity(0.85),
+                          AppTheme.secondaryBrand.withOpacity(0.85),
                         ],
-                      )
-                    : null,
-                color: _isRecording
-                    ? null
-                    : Theme.of(context).colorScheme.surfaceVariant,
+                ),
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
@@ -351,9 +348,7 @@ class _TunerPageState extends State<TunerPage> {
               child: Icon(
                 _isRecording ? Icons.mic_rounded : Icons.tune_rounded,
                 size: 80,
-                color: _isRecording
-                    ? Colors.white
-                    : Theme.of(context).colorScheme.onSurfaceVariant,
+                color: Colors.white,
               ),
             ),
             const SizedBox(height: 24),
@@ -521,34 +516,51 @@ class _TunerPageState extends State<TunerPage> {
             ),
             const SizedBox(height: 32),
 
-            // Tlačítko start/stop
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _isRecording ? _stopRecording : _startRecording,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 20),
-                  backgroundColor: _isRecording
-                      ? Theme.of(context).colorScheme.error
-                      : Theme.of(context).colorScheme.primary,
-                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(_isRecording ? Icons.stop_rounded : Icons.mic_rounded),
-                    const SizedBox(width: 12),
-                    Text(
-                      _isRecording ? 'Zastavit' : 'Začít ladit',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                      ),
+            // Tlačítko start/stop s gradientem
+            DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: _isRecording
+                    ? const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          AppTheme.secondaryBrand,
+                          AppTheme.primaryBrand,
+                        ],
+                      )
+                    : AppTheme.brandGradient,
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _isRecording ? _stopRecording : _startRecording,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    backgroundColor: Colors.transparent,
+                    foregroundColor: Colors.white,
+                    shadowColor: Colors.transparent,
+                    surfaceTintColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
                     ),
-                  ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        _isRecording ? Icons.stop_rounded : Icons.mic_rounded,
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        _isRecording ? 'Zastavit' : 'Začít ladit',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
