@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -23,6 +24,7 @@ class _ProfilePageState extends State<ProfilePage> {
   final User? _user = FirebaseAuth.instance.currentUser;
   String _displayName = '';
   String _email = '';
+  String? _photoPath;
   bool _isLoading = true;
   final CollectionReference<Map<String, dynamic>> _learnedRef =
       FirebaseFirestore.instance
@@ -54,6 +56,7 @@ class _ProfilePageState extends State<ProfilePage> {
         setState(() {
           _displayName = data?['name'] ?? user.displayName ?? 'Uživatel';
           _email = user.email ?? '';
+          _photoPath = data?['photoPath']; // Lokální cesta k obrázku
           _isLoading = false;
         });
       } else {
@@ -184,73 +187,106 @@ class _ProfilePageState extends State<ProfilePage> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          // Header with brand gradient
-          Container(
-            width: double.infinity,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [AppTheme.primaryBrand, AppTheme.secondaryBrand],
-              ),
-            ),
-            child: SafeArea(
-              bottom: false,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 24, 24, 40),
-                child: Column(
-                  children: [
-                    // Avatar
-                    Container(
-                      width: 100,
-                      height: 100,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.2),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 16,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Center(
-                        child: Text(
-                          _displayName.isNotEmpty ? _displayName[0].toUpperCase() : 'U',
-                          style: TextStyle(
-                            fontSize: 48,
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.onPrimary,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    // Name
-                    Text(
-                      _displayName,
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onPrimary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    // Email
-                    Text(
-                      _email,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.9),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+    return Column(
+      children: [
+        // Header with brand gradient - full width from top including AppBar area
+        Container(
+          width: double.infinity,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [AppTheme.primaryBrand, AppTheme.secondaryBrand],
             ),
           ),
+          child: SafeArea(
+            bottom: false,
+            child: Column(
+              children: [
+                // Custom AppBar with white text
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  child: Row(
+                    children: [
+                      Text(
+                        'Profil',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Profile content
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 8, 24, 40),
+                  child: Column(
+                    children: [
+                      // Avatar
+                      Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white.withOpacity(0.2),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 16,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: ClipOval(
+                          child: _photoPath != null
+                              ? FutureBuilder<bool>(
+                                  future: File(_photoPath!).exists(),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.hasData && snapshot.data == true) {
+                                      return Image.file(
+                                        File(_photoPath!),
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) {
+                                          return _buildDefaultAvatar();
+                                        },
+                                      );
+                                    }
+                                    return _buildDefaultAvatar();
+                                  },
+                                )
+                              : _buildDefaultAvatar(),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      // Name
+                      Text(
+                        _displayName,
+                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      // Email
+                      Text(
+                        _email,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Colors.white.withOpacity(0.9),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        // Scrollable content below gradient
+        Expanded(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
 
           const SizedBox(height: 24),
 
@@ -286,15 +322,6 @@ class _ProfilePageState extends State<ProfilePage> {
                         color: AppTheme.secondary,
                       );
                     },
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildStatCard(
-                    icon: Icons.schedule_rounded,
-                    label: 'Hodin cvičení',
-                    value: '24',
-                    color: AppTheme.tertiaryBrand,
                   ),
                 ),
               ],
@@ -572,9 +599,12 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
 
-          const SizedBox(height: 24), // Bottom padding
-        ],
-      ),
+                const SizedBox(height: 24), // Bottom padding
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -740,6 +770,19 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDefaultAvatar() {
+    return Center(
+      child: Text(
+        _displayName.isNotEmpty ? _displayName[0].toUpperCase() : 'U',
+        style: const TextStyle(
+          fontSize: 48,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
         ),
       ),
     );

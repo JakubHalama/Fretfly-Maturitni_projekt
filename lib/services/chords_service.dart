@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import '../models/chord.dart';
 
 class ChordsService {
@@ -135,9 +136,9 @@ class ChordsService {
   }
 
   // Inicializuje databázi s základními akordy
-  // Inicializuje databázi s základními akordy
   Future<void> initializeChords() async {
-    final chords = [
+    try {
+      final chords = [
       // Major akordy (všechny tóny)
       Chord(
         id: 'c_major',
@@ -437,12 +438,21 @@ class ChordsService {
       ),
     ];
 
-    for (final chord in chords) {
-      final docRef = _firestore.collection(_collection).doc(chord.id);
-      final existing = await docRef.get();
-      if (!existing.exists) {
-        await docRef.set(chord.toMap());
+      for (final chord in chords) {
+        try {
+          final docRef = _firestore.collection(_collection).doc(chord.id);
+          final existing = await docRef.get();
+          if (!existing.exists) {
+            await docRef.set(chord.toMap());
+          }
+        } catch (e) {
+          // Ignoruj chyby při inicializaci jednotlivých akordů
+          debugPrint('Error initializing chord ${chord.id}: $e');
+        }
       }
+    } catch (e) {
+      // Ignoruj chyby při inicializaci - akordy se načtou ze streamu
+      debugPrint('Error in initializeChords: $e');
     }
   }
 }

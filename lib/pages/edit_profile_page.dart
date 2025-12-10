@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage({super.key});
@@ -37,22 +38,29 @@ class _EditProfilePageState extends State<EditProfilePage> {
           .doc(_user!.uid)
           .get();
 
+      String? photoPath;
       if (userDoc.exists && userDoc.data() != null) {
-        setState(() {
-          _nameController.text = userDoc.data()?['name'] ?? _user!.displayName ?? '';
-          _currentPhotoUrl = userDoc.data()?['photoUrl'] ?? _user!.photoURL;
-        });
+        _nameController.text = userDoc.data()?['name'] ?? _user!.displayName ?? '';
+        photoPath = userDoc.data()?['photoPath']; // Lokální cesta k obrázku
       } else {
-        setState(() {
-          _nameController.text = _user!.displayName ?? '';
-          _currentPhotoUrl = _user!.photoURL;
-        });
+        _nameController.text = _user!.displayName ?? '';
       }
+
+      // Načti lokální obrázek, pokud existuje
+      if (photoPath != null) {
+        final file = File(photoPath);
+        if (await file.exists()) {
+          setState(() {
+            _currentPhotoUrl = photoPath; // Použijeme cestu jako identifikátor
+          });
+        }
+      }
+      
+      setState(() {});
     } catch (e) {
       debugPrint('Error loading user data: $e');
       setState(() {
         _nameController.text = _user!.displayName ?? '';
-        _currentPhotoUrl = _user!.photoURL;
       });
     }
   }
@@ -138,38 +146,54 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
   }
 
-  Future<String?> _uploadProfileImage(File imageFile) async {
+  Future<String?> _saveProfileImageLocally(File imageFile) async {
     if (_user == null) return null;
 
     try {
-      final String fileName = 'profile_${_user!.uid}_${DateTime.now().millisecondsSinceEpoch}.jpg';
-      final Reference storageRef = FirebaseStorage.instance
-          .ref()
-          .child('profile_images')
-          .child(fileName);
+      // Zkontroluj, jestli soubor existuje
+      if (!await imageFile.exists()) {
+        debugPrint('Image file does not exist: ${imageFile.path}');
+        return null;
+      }
 
-      debugPrint('Uploading image to: ${storageRef.fullPath}');
-      final UploadTask uploadTask = storageRef.putFile(imageFile);
-      final TaskSnapshot snapshot = await uploadTask;
-      final String downloadUrl = await snapshot.ref.getDownloadURL();
+      // Získej adresář aplikace
+      final appDir = await getApplicationDocumentsDirectory();
+      final profileImagesDir = Directory(path.join(appDir.path, 'profile_images'));
       
-      debugPrint('Image uploaded successfully: $downloadUrl');
-      return downloadUrl;
-    } catch (e) {
-      debugPrint('Error uploading image: $e');
+      // Vytvoř adresář, pokud neexistuje
+      if (!await profileImagesDir.exists()) {
+        await profileImagesDir.create(recursive: true);
+      }
+
+      // Vytvoř název souboru
+      final String fileName = 'profile_${_user!.uid}_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final String localPath = path.join(profileImagesDir.path, fileName);
+
+      // Zkopíruj obrázek do lokálního adresáře
+      await imageFile.copy(localPath);
+      
+      debugPrint('Image saved locally: $localPath');
+      return localPath;
+    } catch (e, stackTrace) {
+      debugPrint('Error saving image locally: $e');
+      debugPrint('Stack trace: $stackTrace');
       return null;
     }
   }
 
-  Future<void> _deleteOldProfileImage(String imageUrl) async {
+  Future<void> _deleteOldProfileImage(String? imagePath) async {
+    if (imagePath == null) return;
+    
     try {
-      if (imageUrl.contains('firebase')) {
-        final Reference ref = FirebaseStorage.instance.refFromURL(imageUrl);
-        await ref.delete();
-        debugPrint('Old profile image deleted');
+      // Pokud je to lokální cesta, smaž soubor
+      final file = File(imagePath);
+      if (await file.exists()) {
+        await file.delete();
+        debugPrint('Old profile image deleted: $imagePath');
       }
     } catch (e) {
-      debugPrint('Error deleting old image: $e');
+      // Ignoruj chyby při mazání - není to kritické
+      debugPrint('Error deleting old image (non-critical): $e');
     }
   }
 
@@ -181,45 +205,42 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
     try {
       final newName = _nameController.text.trim();
-      String? photoUrl = _currentPhotoUrl;
+      String? photoPath = _currentPhotoUrl;
 
-      // Pokud byl vybrán nový obrázek, nahraj ho
+      // Pokud byl vybrán nový obrázek, ulož ho lokálně
       if (_selectedImage != null) {
-        debugPrint('Uploading new profile image...');
-        
-        // Smaž starý obrázek pokud existuje
-        if (_currentPhotoUrl != null) {
-          await _deleteOldProfileImage(_currentPhotoUrl!);
-        }
+        debugPrint('Saving new profile image locally...');
 
-        // Nahraj nový obrázek
-        photoUrl = await _uploadProfileImage(_selectedImage!);
+        // Ulož nový obrázek PRVNÍ
+        photoPath = await _saveProfileImageLocally(_selectedImage!);
         
-        if (photoUrl == null) {
-          throw Exception('Nepodařilo se nahrát obrázek');
+        if (photoPath == null) {
+          throw Exception('Nepodařilo se uložit obrázek');
+        }
+        
+        // Teprve po úspěšném uložení smaž starý obrázek (pokud existuje)
+        if (_currentPhotoUrl != null && _currentPhotoUrl != photoPath) {
+          await _deleteOldProfileImage(_currentPhotoUrl);
         }
       }
 
-      debugPrint('Saving profile: name=$newName, photoUrl=$photoUrl');
+      debugPrint('Saving profile: name=$newName, photoPath=$photoPath');
 
-      // Ulož do Firestore
+      // Ulož do Firestore (ukládáme lokální cestu, ne URL)
       await FirebaseFirestore.instance
           .collection('users')
           .doc(_user!.uid)
           .set({
         'name': newName,
         'email': _user!.email ?? '',
-        'photoUrl': photoUrl,
+        'photoPath': photoPath, // Lokální cesta k obrázku
         'updatedAt': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
 
       debugPrint('Firestore updated successfully');
 
-      // Ulož do Firebase Auth
+      // Ulož do Firebase Auth (jen jméno, obrázek zůstane lokální)
       await _user!.updateDisplayName(newName);
-      if (photoUrl != null) {
-        await _user!.updatePhotoURL(photoUrl);
-      }
       await _user!.reload();
       
       debugPrint('Firebase Auth updated successfully');
@@ -310,20 +331,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                   fit: BoxFit.cover,
                                 )
                               : _currentPhotoUrl != null
-                                  ? Image.network(
-                                      _currentPhotoUrl!,
+                                  ? Image.file(
+                                      File(_currentPhotoUrl!),
                                       fit: BoxFit.cover,
-                                      loadingBuilder: (context, child, loadingProgress) {
-                                        if (loadingProgress == null) return child;
-                                        return Center(
-                                          child: CircularProgressIndicator(
-                                            value: loadingProgress.expectedTotalBytes != null
-                                                ? loadingProgress.cumulativeBytesLoaded /
-                                                    loadingProgress.expectedTotalBytes!
-                                                : null,
-                                          ),
-                                        );
-                                      },
                                       errorBuilder: (context, error, stackTrace) {
                                         return _buildDefaultAvatar();
                                       },

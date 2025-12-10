@@ -599,7 +599,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _tabIndex == 2 ? null : AppBar(
+      appBar: (_tabIndex == 2 || _tabIndex == 4) ? null : AppBar(
         title: Text(_titleForIndex(_tabIndex)),
         elevation: 0,
       ),

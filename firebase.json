@@ -1,1 +1,45 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"fretfly-67cb0","appId":"1:890068535217:android:10737f13221e5d742c9f90","fileOutput":"android/app/google-services.json"}},"ios":{"default":{"projectId":"fretfly-67cb0","appId":"1:890068535217:ios:75ce4f11291590742c9f90","uploadDebugSymbols":false,"fileOutput":"ios/Runner/GoogleService-Info.plist"}},"macos":{"default":{"projectId":"fretfly-67cb0","appId":"1:890068535217:ios:75ce4f11291590742c9f90","uploadDebugSymbols":false,"fileOutput":"macos/Runner/GoogleService-Info.plist"}},"dart":{"lib/firebase_options.dart":{"projectId":"fretfly-67cb0","configurations":{"android":"1:890068535217:android:10737f13221e5d742c9f90","ios":"1:890068535217:ios:75ce4f11291590742c9f90","macos":"1:890068535217:ios:75ce4f11291590742c9f90"}}}}}}
+{
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "fretfly-67cb0",
+          "appId": "1:890068535217:android:10737f13221e5d742c9f90",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "fretfly-67cb0",
+          "appId": "1:890068535217:ios:75ce4f11291590742c9f90",
+          "uploadDebugSymbols": false,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "macos": {
+        "default": {
+          "projectId": "fretfly-67cb0",
+          "appId": "1:890068535217:ios:75ce4f11291590742c9f90",
+          "uploadDebugSymbols": false,
+          "fileOutput": "macos/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "fretfly-67cb0",
+          "configurations": {
+            "android": "1:890068535217:android:10737f13221e5d742c9f90",
+            "ios": "1:890068535217:ios:75ce4f11291590742c9f90",
+            "macos": "1:890068535217:ios:75ce4f11291590742c9f90"
+          }
+        }
+      }
+    }
+  }
+}
