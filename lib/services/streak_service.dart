@@ -42,6 +42,8 @@ class StreakService {
         }
       }
 
+      final bool isFirstLoginEver = !snap.exists;
+
       if (lastLogin == null) {
         currentStreak = 1;
         longestStreak = currentStreak;
@@ -65,6 +67,36 @@ class StreakService {
         'longestStreak': longestStreak,
         'lastLogin': today, // saved as Timestamp by Firestore SDK
       }, SetOptions(merge: true));
+
+      // Ocenění na základě streaku / prvního přihlášení
+      final achievementsRef = userRef.collection('achievements');
+
+      if (isFirstLoginEver) {
+        achievementsRef.doc('novacek').set({
+          'title': 'Nováček',
+          'description': 'První přihlášení do Fretfly.',
+          'icon': '🌱',
+          'unlockedAt': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
+      }
+
+      if (currentStreak >= 7) {
+        achievementsRef.doc('pravidelny_hrac').set({
+          'title': 'Pravidelný hráč',
+          'description': 'Udržel jsi denní streak 7 dní v řadě.',
+          'icon': '🔥',
+          'unlockedAt': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
+      }
+
+      if (currentStreak >= 30) {
+        achievementsRef.doc('zelezna_vule').set({
+          'title': 'Železná vůle',
+          'description': 'Cvičíš každý den alespoň 30 dní v kuse.',
+          'icon': '💪',
+          'unlockedAt': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
+      }
     });
   }
 

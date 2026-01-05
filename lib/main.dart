@@ -12,7 +12,14 @@ import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    debugPrint('Error initializing Firebase: $e');
+    // Pokračuj i při chybě - aplikace se může spustit bez Firebase
+  }
   runApp(const MyApp());
 }
 
@@ -61,19 +68,33 @@ class _AppInitializerState extends State<AppInitializer> {
   }
 
   Future<void> _initializeApp() async {
-    // Minimální doba zobrazení splash screen (2 sekundy)
-    await Future.delayed(const Duration(seconds: 2));
-    
-    // Zkontroluj přihlášeného uživatele
-    _user = FirebaseAuth.instance.currentUser;
-    
-    // Můžeš přidat další inicializační logiku zde
-    // např. načtení dat, kontrolu verzí, atd.
-    
-    if (mounted) {
-      setState(() {
-        _isInitialized = true;
-      });
+    try {
+      // Minimální doba zobrazení splash screen (2 sekundy)
+      await Future.delayed(const Duration(seconds: 2));
+
+      // Zkontroluj přihlášeného uživatele
+      try {
+        _user = FirebaseAuth.instance.currentUser;
+      } catch (e) {
+        debugPrint('Error getting current user: $e');
+        _user = null;
+      }
+
+      // Můžeš přidat další inicializační logiku zde
+      // např. načtení dat, kontrolu verzí, atd.
+
+      if (mounted) {
+        setState(() {
+          _isInitialized = true;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error in _initializeApp: $e');
+      if (mounted) {
+        setState(() {
+          _isInitialized = true; // I při chybě pokračuj
+        });
+      }
     }
   }
 

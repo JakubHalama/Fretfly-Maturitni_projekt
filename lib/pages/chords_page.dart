@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../models/chord.dart';
 import '../services/chords_service.dart';
 import '../services/learned_chords_service.dart';
@@ -312,6 +313,7 @@ class _ChordsPageState extends State<ChordsPage> {
                                       ),
                                       child: OutlinedButton.icon(
                                         onPressed: () async {
+                                          HapticFeedback.lightImpact();
                                           await _learnedService.setLearned(
                                             chord,
                                             learned: false,
@@ -370,6 +372,7 @@ class _ChordsPageState extends State<ChordsPage> {
                                       ),
                                       child: FilledButton.icon(
                                         onPressed: () async {
+                                          HapticFeedback.mediumImpact();
                                           await _learnedService.setLearned(
                                             chord,
                                             learned: true,

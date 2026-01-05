@@ -57,37 +57,62 @@ class _TunerPageState extends State<TunerPage> {
   }
 
   Future<void> _startRecording() async {
-    // Požádej o povolení k mikrofonu
-    final status = await Permission.microphone.request();
-    if (!status.isGranted) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Pro použití ladičky je potřeba povolení k mikrofonu. Zkontrolujte nastavení aplikace.',
-            ),
-            duration: Duration(seconds: 4),
-          ),
-        );
-      }
-      return;
-    }
-
     try {
-      // Zkontroluj, zda má recorder povolení
+      // Zkontroluj, zda má recorder povolení - record package automaticky požádá o povolení
       final hasPermission = await _recorder.hasPermission();
+      debugPrint('Recorder hasPermission: $hasPermission');
+      
       if (!hasPermission) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                'Nahrávání nemá povolení. Zkontrolujte nastavení mikrofonu v iOS Simulatoru: Device > Microphone > Built-in Microphone',
+        // Zkus požádat o povolení přes permission_handler
+        final status = await Permission.microphone.request();
+        debugPrint('Microphone permission status: $status');
+        
+        if (!status.isGranted) {
+          if (mounted) {
+            final shouldOpen = await showDialog<bool>(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: const Text('Povolení k mikrofonu'),
+                content: const Text(
+                  'Pro použití ladičky je potřeba povolení k mikrofonu.\n\n'
+                  'V nastavení: Nastavení → Fretfly → Mikrofon → Zapnout\n\n'
+                  'Pokud tam mikrofon nevidíš, odinstaluj aplikaci a znovu ji nainstaluj.',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    child: const Text('Zrušit'),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    child: const Text('Otevřít nastavení'),
+                  ),
+                ],
               ),
-              duration: Duration(seconds: 5),
-            ),
-          );
+            );
+            
+            if (shouldOpen == true) {
+              await openAppSettings();
+            }
+          }
+          return;
         }
-        return;
+        
+        // Zkontroluj znovu po požádání o povolení
+        final hasPermissionAfter = await _recorder.hasPermission();
+        if (!hasPermissionAfter) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'Povolení k mikrofonu nebylo uděleno. Zkontrolujte nastavení aplikace.',
+                ),
+                duration: Duration(seconds: 5),
+              ),
+            );
+          }
+          return;
+        }
       }
 
       // Získej dočasný soubor pro nahrávání
@@ -200,6 +225,7 @@ class _TunerPageState extends State<TunerPage> {
 
       final frequency = _detectFrequency(analysisSamples);
       debugPrint('Detected frequency: $frequency Hz');
+      debugPrint('Selected string: $_selectedString');
 
       if (frequency > 0) {
         final closestNote = _findClosestNote(frequency);
@@ -211,6 +237,41 @@ class _TunerPageState extends State<TunerPage> {
           debugPrint(
             'Target: ${targetFreq}Hz, Detected: ${frequency}Hz, Deviation: ${deviation.toStringAsFixed(1)} cents',
           );
+          debugPrint('Frequency ratio: ${frequency / targetFreq}');
+          
+          // Pokud je odchylka větší než 1200 centů (oktáva), možná detekujeme harmonickou
+          if (deviation.abs() > 1200) {
+            debugPrint('WARNING: Very large deviation detected. Possible harmonic detection issue.');
+            // Zkus dělit nebo násobit frekvenci
+            final doubleFreq = frequency * 2;
+            final halfFreq = frequency / 2;
+            debugPrint('Trying double frequency: $doubleFreq Hz, half frequency: $halfFreq Hz');
+            
+            final doubleDev = _calculateDeviation(doubleFreq, targetFreq);
+            final halfDev = _calculateDeviation(halfFreq, targetFreq);
+            
+            if (doubleDev.abs() < deviation.abs() && doubleFreq <= 500) {
+              debugPrint('Using double frequency (better match)');
+              if (mounted) {
+                setState(() {
+                  _detectedFrequency = doubleFreq;
+                  _detectedNote = closestNote;
+                  _deviation = doubleDev;
+                });
+              }
+              return;
+            } else if (halfDev.abs() < deviation.abs() && halfFreq >= 50) {
+              debugPrint('Using half frequency (better match)');
+              if (mounted) {
+                setState(() {
+                  _detectedFrequency = halfFreq;
+                  _detectedNote = _findClosestNote(halfFreq);
+                  _deviation = halfDev;
+                });
+              }
+              return;
+            }
+          }
         }
 
         if (mounted) {
@@ -245,26 +306,81 @@ class _TunerPageState extends State<TunerPage> {
   double _detectFrequency(List<int> samples) {
     if (samples.length < 2) return 0.0;
 
-    // Zero-crossing detection
+    // Normalizuj vzorky (odstraň DC offset)
+    final normalized = _normalizeSamples(samples);
+    
+    // Zero-crossing detection s threshold pro ignorování šumu
+    const threshold = 100; // Threshold pro ignorování malých hodnot (šum)
     int zeroCrossings = 0;
-    for (int i = 1; i < samples.length; i++) {
-      // Detekuj průchod nulou
-      if ((samples[i - 1] >= 0 && samples[i] < 0) ||
-          (samples[i - 1] < 0 && samples[i] >= 0)) {
+    bool wasPositive = normalized[0] > 0;
+    
+    for (int i = 1; i < normalized.length; i++) {
+      final current = normalized[i];
+      final previous = normalized[i - 1];
+      
+      // Ignoruj malé hodnoty (šum)
+      if (current.abs() < threshold && previous.abs() < threshold) {
+        continue;
+      }
+      
+      // Detekuj průchod nulou s threshold
+      if (wasPositive && current < -threshold) {
         zeroCrossings++;
+        wasPositive = false;
+      } else if (!wasPositive && current > threshold) {
+        zeroCrossings++;
+        wasPositive = true;
       }
     }
 
     // Frekvence = počet zero-crossings / 2 / délka v sekundách
     final duration = samples.length / sampleRate;
+    if (duration <= 0) return 0.0;
+    
     final frequency = (zeroCrossings / 2) / duration;
 
     // Filtruj nereálné frekvence (pro kytaru: 50-500 Hz)
     if (frequency < 50 || frequency > 500) {
+      debugPrint('Frequency out of range: $frequency Hz');
       return 0.0;
     }
 
+    // Pokud je frekvence příliš vysoká, může to být harmonická - zkus dělit 2
+    if (frequency > 300) {
+      final halfFreq = frequency / 2;
+      if (halfFreq >= 50 && halfFreq <= 500) {
+        debugPrint('Possible harmonic detected: $frequency Hz, trying $halfFreq Hz');
+        // Zkontroluj, jestli polovina frekvence není blíž k nějaké struně
+        bool halfIsBetter = false;
+        for (final entry in _stringFrequencies.entries) {
+          final diffFull = (frequency - entry.value).abs();
+          final diffHalf = (halfFreq - entry.value).abs();
+          if (diffHalf < diffFull) {
+            halfIsBetter = true;
+            break;
+          }
+        }
+        if (halfIsBetter) {
+          return halfFreq;
+        }
+      }
+    }
+
     return frequency;
+  }
+  
+  List<int> _normalizeSamples(List<int> samples) {
+    if (samples.isEmpty) return samples;
+    
+    // Vypočítej průměr (DC offset)
+    int sum = 0;
+    for (final sample in samples) {
+      sum += sample;
+    }
+    final average = (sum / samples.length).round();
+    
+    // Odečti průměr od všech vzorků
+    return samples.map((s) => s - average).toList();
   }
 
   String _findClosestNote(double frequency) {

@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fretfly/auth_service.dart';
@@ -603,10 +604,22 @@ class _HomePageState extends State<HomePage> {
         title: Text(_titleForIndex(_tabIndex)),
         elevation: 0,
       ),
-      body: _buildBody(),
+      body: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 250),
+        switchInCurve: Curves.easeOut,
+        switchOutCurve: Curves.easeIn,
+        child: KeyedSubtree(
+          key: ValueKey(_tabIndex),
+          child: _buildBody(),
+        ),
+      ),
       bottomNavigationBar: _BottomNavBar(
         currentIndex: _tabIndex,
-        onTap: (i) => setState(() => _tabIndex = i),
+        onTap: (i) {
+          if (i == _tabIndex) return;
+          HapticFeedback.selectionClick();
+          setState(() => _tabIndex = i);
+        },
         items: const [
           _NavItem(
             icon: Icons.access_time_outlined,
@@ -709,7 +722,10 @@ class _NavButton extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: onPressed,
+          onTap: () {
+            HapticFeedback.selectionClick();
+            onPressed();
+          },
           borderRadius: BorderRadius.circular(12),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 250),

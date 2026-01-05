@@ -51,6 +51,41 @@ class LearnedChordsService {
         'category': chord.category,
         'addedAt': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
+
+      // Zkontroluj, jestli uživatel nemá naučené všechny akordy
+      final allChordsSnapshot =
+          await _firestore.collection('chords').get(const GetOptions(source: Source.serverAndCache));
+      final learnedSnapshot = await _collectionRef().get();
+
+      final totalChords = allChordsSnapshot.docs.length;
+      final learnedCount = learnedSnapshot.docs.length;
+
+      if (totalChords > 0 && learnedCount >= totalChords) {
+        final userDoc =
+            _firestore.collection('users').doc(_uid);
+        final achievementsRef = userDoc.collection('achievements');
+
+        await achievementsRef.doc('maestro').set({
+          'title': 'Maestro',
+          'description': 'Naučil ses všechny akordy v knihovně.',
+          'icon': '🎓',
+          'unlockedAt': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
+      }
+
+      // Další ocenění: první naučený akord
+      if (learnedSnapshot.docs.isEmpty) {
+        final userDoc =
+            _firestore.collection('users').doc(_uid);
+        final achievementsRef = userDoc.collection('achievements');
+
+        await achievementsRef.doc('prvni_akord').set({
+          'title': 'První akord',
+          'description': 'Označil jsi svůj první naučený akord.',
+          'icon': '🎵',
+          'unlockedAt': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
+      }
     } else {
       await ref.delete();
     }
