@@ -11,21 +11,24 @@ class MetronomePage extends StatefulWidget {
   State<MetronomePage> createState() => _MetronomePageState();
 }
 
-class _MetronomePageState extends State<MetronomePage> with SingleTickerProviderStateMixin {
+class _MetronomePageState extends State<MetronomePage>
+    with SingleTickerProviderStateMixin {
   // Audio players
-  final AudioPlayer _accentPlayer = AudioPlayer(); // Pro první dobu (vyšší pitch)
-  final AudioPlayer _regularPlayer = AudioPlayer(); // Pro ostatní doby (normální)
-  
+  final AudioPlayer _accentPlayer =
+      AudioPlayer(); // Pro první dobu (vyšší pitch)
+  final AudioPlayer _regularPlayer =
+      AudioPlayer(); // Pro ostatní doby (normální)
+
   // Metronome state
   bool _isPlaying = false;
   int _bpm = 120;
   int _beatsPerBar = 4;
   int _currentBeat = 0;
   Timer? _timer;
-  
+
   // Tap tempo
   final List<DateTime> _tapTimes = [];
-  
+
   // Animation
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
@@ -52,11 +55,11 @@ class _MetronomePageState extends State<MetronomePage> with SingleTickerProvider
       // První doba: vyšší pitch (rychlejší přehrávání = vyšší tón)
       await _accentPlayer.setVolume(1.0);
       await _accentPlayer.setSpeed(2.0); // Vyšší pitch
-      
+
       // Ostatní doby: normální pitch
       await _regularPlayer.setVolume(0.7);
       await _regularPlayer.setSpeed(1.0); // Normální pitch
-      
+
       debugPrint('Sounds loaded successfully');
     } catch (e) {
       debugPrint('Error loading sounds: $e');
@@ -85,10 +88,21 @@ class _MetronomePageState extends State<MetronomePage> with SingleTickerProvider
   }
 
   void _startMetronome() {
-    _playBeat();
+    // Nastav _currentBeat na 0, aby první timer tick přehrál první dobu
+    setState(() {
+      _currentBeat = 0;
+    });
     final interval = Duration(milliseconds: (60000 / _bpm).round());
-    _timer = Timer.periodic(interval, (timer) {
+    // První doba se přehraje až při prvním timer ticku, ne okamžitě
+    _playNextBeat(interval);
+  }
+
+  void _playNextBeat(Duration interval) {
+    _timer = Timer(interval, () {
       _playBeat();
+      // Po přehrání doby naplánuj další dobu
+      // Tím zajistíme, že mezera mezi čtvrtou a první dobou je stejná jako mezi ostatními
+      _playNextBeat(interval);
     });
   }
 
@@ -104,10 +118,10 @@ class _MetronomePageState extends State<MetronomePage> with SingleTickerProvider
     setState(() {
       _currentBeat = (_currentBeat % _beatsPerBar) + 1;
     });
-    
+
     // Animace
     _animationController.forward(from: 0.0);
-    
+
     // Přehraj správný zvuk podle doby
     try {
       if (_currentBeat == 1) {
@@ -147,11 +161,11 @@ class _MetronomePageState extends State<MetronomePage> with SingleTickerProvider
   void _tapTempo() {
     final now = DateTime.now();
     _tapTimes.add(now);
-    
+
     if (_tapTimes.length > 4) {
       _tapTimes.removeAt(0);
     }
-    
+
     if (_tapTimes.length >= 2) {
       final intervals = <int>[];
       for (int i = 1; i < _tapTimes.length; i++) {
@@ -159,7 +173,7 @@ class _MetronomePageState extends State<MetronomePage> with SingleTickerProvider
       }
       final avgInterval = intervals.reduce((a, b) => a + b) / intervals.length;
       final newBpm = (60000 / avgInterval).round().clamp(40, 240);
-      
+
       setState(() {
         _bpm = newBpm;
         if (_isPlaying) {
@@ -168,11 +182,11 @@ class _MetronomePageState extends State<MetronomePage> with SingleTickerProvider
         }
       });
     }
-    
+
     HapticFeedback.mediumImpact();
-    
+
     Future.delayed(const Duration(seconds: 2), () {
-      if (_tapTimes.isNotEmpty && 
+      if (_tapTimes.isNotEmpty &&
           DateTime.now().difference(_tapTimes.last).inSeconds > 2) {
         _tapTimes.clear();
       }
@@ -186,10 +200,11 @@ class _MetronomePageState extends State<MetronomePage> with SingleTickerProvider
       padding: const EdgeInsets.all(32),
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          minHeight: MediaQuery.of(context).size.height - 
-                    MediaQuery.of(context).padding.top - 
-                    MediaQuery.of(context).padding.bottom - 
-                    64, // Výška paddingu
+          minHeight:
+              MediaQuery.of(context).size.height -
+              MediaQuery.of(context).padding.top -
+              MediaQuery.of(context).padding.bottom -
+              64, // Výška paddingu
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -206,11 +221,11 @@ class _MetronomePageState extends State<MetronomePage> with SingleTickerProvider
                     end: Alignment.bottomRight,
                     colors: _isPlaying
                         ? (_currentBeat == 1
-                            ? [AppTheme.primaryBrand, AppTheme.secondaryBrand]
-                            : [
-                                AppTheme.primaryBrand.withOpacity(0.9),
-                                AppTheme.secondaryBrand.withOpacity(0.7),
-                              ])
+                              ? [AppTheme.primaryBrand, AppTheme.secondaryBrand]
+                              : [
+                                  AppTheme.primaryBrand.withOpacity(0.9),
+                                  AppTheme.secondaryBrand.withOpacity(0.7),
+                                ])
                         : [
                             AppTheme.primaryBrand.withOpacity(0.85),
                             AppTheme.secondaryBrand.withOpacity(0.85),
@@ -259,9 +274,9 @@ class _MetronomePageState extends State<MetronomePage> with SingleTickerProvider
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             if (_isPlaying) ...[
               const SizedBox(height: 8),
               Row(
@@ -295,7 +310,7 @@ class _MetronomePageState extends State<MetronomePage> with SingleTickerProvider
             ] else ...[
               const SizedBox(height: 32),
             ],
-            
+
             // BPM Controls
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
@@ -354,9 +369,8 @@ class _MetronomePageState extends State<MetronomePage> with SingleTickerProvider
                             ),
                             Text(
                               '$_bpm BPM',
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                  ),
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.w700),
                             ),
                           ],
                         ),
@@ -383,9 +397,9 @@ class _MetronomePageState extends State<MetronomePage> with SingleTickerProvider
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 32),
-            
+
             // Time Signature
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
@@ -405,9 +419,9 @@ class _MetronomePageState extends State<MetronomePage> with SingleTickerProvider
                   Text(
                     'Takt',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          color: AppTheme.primaryText,
-                        ),
+                      fontWeight: FontWeight.w800,
+                      color: AppTheme.primaryText,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   SingleChildScrollView(
@@ -429,9 +443,9 @@ class _MetronomePageState extends State<MetronomePage> with SingleTickerProvider
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 32),
-            
+
             // Main Control Button
             DecoratedBox(
               decoration: BoxDecoration(
@@ -476,9 +490,9 @@ class _MetronomePageState extends State<MetronomePage> with SingleTickerProvider
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             DecoratedBox(
               decoration: BoxDecoration(
                 gradient: AppTheme.brandGradient,
@@ -510,14 +524,14 @@ class _MetronomePageState extends State<MetronomePage> with SingleTickerProvider
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 12),
-            
+
             Text(
               'Klikej na TAP TEMPO v rytmu pro nastavení BPM',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppTheme.mutedText,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: AppTheme.mutedText),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24), // Bottom padding
@@ -534,19 +548,14 @@ class _MetronomePageState extends State<MetronomePage> with SingleTickerProvider
         '$beats/4',
         style: TextStyle(
           fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-          color: isSelected 
-              ? Colors.white 
-              : AppTheme.primary,
+          color: isSelected ? Colors.white : AppTheme.primary,
         ),
       ),
       selected: isSelected,
       onSelected: (selected) => _setTimeSignature(beats),
       selectedColor: AppTheme.primary,
       backgroundColor: Theme.of(context).colorScheme.surface,
-      side: BorderSide(
-        color: AppTheme.primary,
-        width: 2,
-      ),
+      side: BorderSide(color: AppTheme.primary, width: 2),
       showCheckmark: false,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
     );
