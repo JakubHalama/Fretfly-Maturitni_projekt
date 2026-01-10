@@ -15,7 +15,7 @@ FretFly je mobilní aplikace vyvinutá v prostředí **Flutter**, jejímž cíle
 ---
 
 ## Přehled projektu
-Aplikace FretFly slouží jako digitální pomocník pro začínající i pokročilé kytaristy. Spojuje několik často používaných nástrojů do jednoho celku a eliminuje nutnost využívat více samostatných aplikací, které bývají omezené reklamou nebo placeným předplatným.
+Aplikace FretFly slouží jako digitální pomocník pro začínající i pokročilé kytaristy.
 
 Projekt klade důraz na:
 - srozumitelné uživatelské rozhraní,  
@@ -55,11 +55,8 @@ Důraz byl kladen na:
 
 ## Cíle projektu
 Hlavním cílem projektu bylo vytvořit **funkční a technicky kvalitní mobilní aplikaci**, která:
-- kombinuje nejdůležitější nástroje pro kytaristy,  
-- je použitelná bez nutnosti placeného předplatného,  
+- kombinuje nejdůležitější nástroje pro kytaristy, 
 - slouží jako praktická ukázka schopností práce s Flutterem, Firebase a zpracováním zvuku v reálném čase.
-
-Projekt zároveň představuje komplexní studentskou práci propojující **vývoj mobilních aplikací, práci s audiem a návrh uživatelského rozhraní**.
 
 ---
 
@@ -81,7 +78,7 @@ FretFly is a mobile application developed using **Flutter**, designed to provide
 ---
 
 ## Project Overview
-FretFly serves as a digital assistant for both beginner and advanced guitarists. It integrates several commonly used tools into a single application, eliminating the need for multiple standalone apps that are often limited by advertisements or paid subscriptions.
+FretFly serves as a digital assistant for both beginner and advanced guitarists.
 
 The project emphasizes:
 - a clear and intuitive user interface,  
@@ -122,7 +119,6 @@ Key architectural principles include:
 ## Project Goals
 The main goal of the project was to create a **functional and technically sound mobile application** that:
 - combines essential tools for guitar practice,  
-- is usable without mandatory paid subscriptions,  
 - demonstrates practical skills in Flutter development, Firebase integration, and real-time audio processing.
 
 The project represents a comprehensive student work combining **mobile application development, audio signal processing, and user interface design**.
