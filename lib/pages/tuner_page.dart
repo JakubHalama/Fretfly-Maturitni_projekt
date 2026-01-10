@@ -28,6 +28,8 @@ class _TunerPageState extends State<TunerPage> {
   final List<int> _audioSamples = [];
   static const int sampleRate = 44100;
   static const int bufferSize = 4096; // Velikost bufferu pro analýzu
+  double _smoothedFrequency =
+      0.0; // Vyhlazená frekvence pro stabilnější zobrazení
 
   // Standardní frekvence strun v Hz
   static const Map<String, double> _stringFrequencies = {
@@ -61,12 +63,12 @@ class _TunerPageState extends State<TunerPage> {
       // Zkontroluj, zda má recorder povolení - record package automaticky požádá o povolení
       final hasPermission = await _recorder.hasPermission();
       debugPrint('Recorder hasPermission: $hasPermission');
-      
+
       if (!hasPermission) {
         // Zkus požádat o povolení přes permission_handler
         final status = await Permission.microphone.request();
         debugPrint('Microphone permission status: $status');
-        
+
         if (!status.isGranted) {
           if (mounted) {
             final shouldOpen = await showDialog<bool>(
@@ -90,14 +92,14 @@ class _TunerPageState extends State<TunerPage> {
                 ],
               ),
             );
-            
+
             if (shouldOpen == true) {
               await openAppSettings();
             }
           }
           return;
         }
-        
+
         // Zkontroluj znovu po požádání o povolení
         final hasPermissionAfter = await _recorder.hasPermission();
         if (!hasPermissionAfter) {
@@ -180,6 +182,7 @@ class _TunerPageState extends State<TunerPage> {
       _detectedNote = null;
       _detectedFrequency = 0.0;
       _deviation = 0.0;
+      _smoothedFrequency = 0.0; // Reset vyhlazené frekvence
       _audioSamples.clear();
       _recordingPath = null;
     });
@@ -228,55 +231,33 @@ class _TunerPageState extends State<TunerPage> {
       debugPrint('Selected string: $_selectedString');
 
       if (frequency > 0) {
-        final closestNote = _findClosestNote(frequency);
+        // Vyhlazení frekvence pomocí exponenciálního průměru (smoothing)
+        // To pomůže stabilizovat výsledky a snížit "skákání"
+        if (_smoothedFrequency == 0.0) {
+          _smoothedFrequency = frequency; // První hodnota
+        } else {
+          // Exponenciální průměr s alpha = 0.3 (30% nová hodnota, 70% stará)
+          // Menší alpha = více vyhlazení, ale pomalejší reakce
+          const alpha = 0.3;
+          _smoothedFrequency =
+              alpha * frequency + (1 - alpha) * _smoothedFrequency;
+        }
+
+        final smoothedFreq = _smoothedFrequency;
+        final closestNote = _findClosestNote(smoothedFreq);
         double deviation = 0.0;
 
         if (_selectedString != null) {
           final targetFreq = _stringFrequencies[_selectedString]!;
-          deviation = _calculateDeviation(frequency, targetFreq);
+          deviation = _calculateDeviation(smoothedFreq, targetFreq);
           debugPrint(
-            'Target: ${targetFreq}Hz, Detected: ${frequency}Hz, Deviation: ${deviation.toStringAsFixed(1)} cents',
+            'Target: ${targetFreq}Hz, Raw: ${frequency}Hz, Smoothed: ${smoothedFreq.toStringAsFixed(1)}Hz, Deviation: ${deviation.toStringAsFixed(1)} cents',
           );
-          debugPrint('Frequency ratio: ${frequency / targetFreq}');
-          
-          // Pokud je odchylka větší než 1200 centů (oktáva), možná detekujeme harmonickou
-          if (deviation.abs() > 1200) {
-            debugPrint('WARNING: Very large deviation detected. Possible harmonic detection issue.');
-            // Zkus dělit nebo násobit frekvenci
-            final doubleFreq = frequency * 2;
-            final halfFreq = frequency / 2;
-            debugPrint('Trying double frequency: $doubleFreq Hz, half frequency: $halfFreq Hz');
-            
-            final doubleDev = _calculateDeviation(doubleFreq, targetFreq);
-            final halfDev = _calculateDeviation(halfFreq, targetFreq);
-            
-            if (doubleDev.abs() < deviation.abs() && doubleFreq <= 500) {
-              debugPrint('Using double frequency (better match)');
-              if (mounted) {
-                setState(() {
-                  _detectedFrequency = doubleFreq;
-                  _detectedNote = closestNote;
-                  _deviation = doubleDev;
-                });
-              }
-              return;
-            } else if (halfDev.abs() < deviation.abs() && halfFreq >= 50) {
-              debugPrint('Using half frequency (better match)');
-              if (mounted) {
-                setState(() {
-                  _detectedFrequency = halfFreq;
-                  _detectedNote = _findClosestNote(halfFreq);
-                  _deviation = halfDev;
-                });
-              }
-              return;
-            }
-          }
         }
 
         if (mounted) {
           setState(() {
-            _detectedFrequency = frequency;
+            _detectedFrequency = smoothedFreq;
             _detectedNote = closestNote;
             _deviation = deviation;
           });
@@ -306,38 +287,21 @@ class _TunerPageState extends State<TunerPage> {
   double _detectFrequency(List<int> samples) {
     if (samples.length < 2) return 0.0;
 
-    // Normalizuj vzorky (odstraň DC offset)
-    final normalized = _normalizeSamples(samples);
-    
-    // Zero-crossing detection s threshold pro ignorování šumu
-    const threshold = 100; // Threshold pro ignorování malých hodnot (šum)
-    int zeroCrossings = 0;
-    bool wasPositive = normalized[0] > 0;
-    
-    for (int i = 1; i < normalized.length; i++) {
-      final current = normalized[i];
-      final previous = normalized[i - 1];
-      
-      // Ignoruj malé hodnoty (šum)
-      if (current.abs() < threshold && previous.abs() < threshold) {
-        continue;
-      }
-      
-      // Detekuj průchod nulou s threshold
-      if (wasPositive && current < -threshold) {
-        zeroCrossings++;
-        wasPositive = false;
-      } else if (!wasPositive && current > threshold) {
-        zeroCrossings++;
-        wasPositive = true;
-      }
+    // Normalizuj vzorky (odstraň DC offset a normalizuj amplitudu)
+    final normalized = _normalizeAndFilterSamples(samples);
+
+    if (normalized.length < 200) {
+      debugPrint('Not enough samples after filtering: ${normalized.length}');
+      return 0.0;
     }
 
-    // Frekvence = počet zero-crossings / 2 / délka v sekundách
-    final duration = samples.length / sampleRate;
-    if (duration <= 0) return 0.0;
-    
-    final frequency = (zeroCrossings / 2) / duration;
+    // Použij autocorrelation pro detekci základní frekvence
+    // Autocorrelation je mnohem spolehlivější než zero-crossing
+    final frequency = _autocorrelationPitchDetection(normalized);
+
+    if (frequency <= 0) {
+      return 0.0;
+    }
 
     // Filtruj nereálné frekvence (pro kytaru: 50-500 Hz)
     if (frequency < 50 || frequency > 500) {
@@ -345,42 +309,105 @@ class _TunerPageState extends State<TunerPage> {
       return 0.0;
     }
 
-    // Pokud je frekvence příliš vysoká, může to být harmonická - zkus dělit 2
-    if (frequency > 300) {
-      final halfFreq = frequency / 2;
-      if (halfFreq >= 50 && halfFreq <= 500) {
-        debugPrint('Possible harmonic detected: $frequency Hz, trying $halfFreq Hz');
-        // Zkontroluj, jestli polovina frekvence není blíž k nějaké struně
-        bool halfIsBetter = false;
-        for (final entry in _stringFrequencies.entries) {
-          final diffFull = (frequency - entry.value).abs();
-          final diffHalf = (halfFreq - entry.value).abs();
-          if (diffHalf < diffFull) {
-            halfIsBetter = true;
-            break;
-          }
-        }
-        if (halfIsBetter) {
-          return halfFreq;
+    return frequency;
+  }
+
+  /// Autocorrelation pitch detection - robustnější metoda pro detekci základní frekvence
+  double _autocorrelationPitchDetection(List<double> samples) {
+    // Rozsah lagů pro hledání (odpovídá frekvencím 50-500 Hz)
+    final minPeriod = (sampleRate / 500).round(); // ~88 samples pro 500 Hz
+    final maxPeriod = (sampleRate / 50).round(); // ~882 samples pro 50 Hz
+
+    if (samples.length < maxPeriod * 2) {
+      debugPrint('Not enough samples for autocorrelation');
+      return 0.0;
+    }
+
+    double maxCorrelation = 0.0;
+    int bestLag = 0;
+
+    // Optimalizace: použij adaptivní krok pro rychlejší výpočet
+    // Pro vyšší frekvence (menší lagy) můžeme použít menší krok
+    // Pro nižší frekvence (větší lagy) použijeme větší krok
+    final int step = maxPeriod > 400 ? 2 : 1; // Krok 2 pro větší lagy
+
+    // Vypočítej autocorrelation pro různé lagy
+    for (
+      int lag = minPeriod;
+      lag < maxPeriod && lag < samples.length ~/ 2;
+      lag += step
+    ) {
+      double correlation = 0.0;
+      int count = 0;
+
+      // Omezení počtu vzorků pro výpočet (pro rychlejší výpočet)
+      final maxSamples = min(samples.length - lag, 2000);
+
+      // Vypočítej korelaci pro tento lag
+      for (int i = 0; i < maxSamples; i++) {
+        correlation += samples[i] * samples[i + lag];
+        count++;
+      }
+
+      if (count > 0) {
+        // Normalizuj korelaci
+        correlation = correlation / count;
+
+        // Najdi nejvyšší korelaci (nejlepší shoda)
+        if (correlation > maxCorrelation) {
+          maxCorrelation = correlation;
+          bestLag = lag;
         }
       }
     }
 
+    // Pokud není dostatečná korelace, není to platný signál
+    if (maxCorrelation < 0.15) {
+      debugPrint('Low correlation: $maxCorrelation (no clear pitch detected)');
+      return 0.0;
+    }
+
+    // Frekvence = sample rate / period (lag)
+    final frequency = sampleRate / bestLag;
+
+    debugPrint(
+      'Autocorrelation: lag=$bestLag, correlation=$maxCorrelation, freq=$frequency Hz',
+    );
+
     return frequency;
   }
-  
-  List<int> _normalizeSamples(List<int> samples) {
-    if (samples.isEmpty) return samples;
-    
-    // Vypočítej průměr (DC offset)
+
+  /// Normalizace a filtrace vzorků - odstraní DC offset a slabý signál
+  List<double> _normalizeAndFilterSamples(List<int> samples) {
+    if (samples.isEmpty) return [];
+
+    // 1. Odstraň DC offset
     int sum = 0;
     for (final sample in samples) {
       sum += sample;
     }
-    final average = (sum / samples.length).round();
-    
-    // Odečti průměr od všech vzorků
-    return samples.map((s) => s - average).toList();
+    final average = sum / samples.length;
+
+    final centered = samples.map((s) => s - average.round()).toList();
+
+    // 2. Vypočítej RMS (Root Mean Square) pro detekci síly signálu
+    double rmsSum = 0.0;
+    for (final sample in centered) {
+      rmsSum += sample * sample;
+    }
+    final rms = sqrt(rmsSum / centered.length);
+
+    // Pokud je signál příliš slabý, není to platný tón
+    if (rms < 500) {
+      debugPrint('Signal too weak: RMS=$rms');
+      return [];
+    }
+
+    // 3. Normalizuj na rozsah -1.0 až 1.0
+    final maxAmplitude = rms * 2; // Použij RMS jako referenci
+    if (maxAmplitude == 0) return [];
+
+    return centered.map((s) => (s / maxAmplitude).clamp(-1.0, 1.0)).toList();
   }
 
   String _findClosestNote(double frequency) {
