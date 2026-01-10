@@ -1,54 +1,128 @@
-# 🎸 Fretfly – Flutter aplikace pro kytaristy
+# FretFly – mobilní aplikace pro kytaristy
 
-> Maturitní projekt – Jakub Halama
-
----
-
-## 📑 Obsah
-- [Popis projektu](#-popis-projektu)
-- [Cíle projektu](#-cíle-projektu)
-- [Hlavní funkce](#-hlavní-funkce)
-- [Použité programy a technologie](#-použité-programy-a-technologie)
-- [Struktura aplikace](#-struktura-aplikace)
-- [Časový harmonogram](#-časový-harmonogram)
-- [Možná rozšíření](#-možná-rozšíření)
+FretFly je mobilní aplikace vyvinutá v prostředí **Flutter**, jejímž cílem je poskytnout kytaristům přehledné a funkční nástroje pro každodenní cvičení. Projekt vznikl jako **maturitní práce** a zaměřuje se na implementaci klíčových hudebních pomůcek s důrazem na jednoduchost použití, technickou správnost a moderní architekturu aplikace.
 
 ---
 
-## 📝 Popis projektu
-**Fretfly** je mobilní aplikace vyvinutá ve **Flutteru** pro kytaristy všech úrovní.  
-Aplikace kombinuje užitečné nástroje (ladění, metronom, databáze akordů) s možností **nahrávání a přehrávání video tutoriálů**, což z ní dělá komplexního pomocníka pro učení i každodenní hraní na kytaru.  
-
-Cílem je vytvořit přehlednou a intuitivní aplikaci, která působí profesionálně, ale zároveň je snadno použitelná.
-
----
-
-## 🎯 Cíle projektu
-- ✅ Vytvořit funkční a stabilní mobilní aplikaci pro **Android/iOS**.  
-- ✅ Implementovat **ladící nástroj (tuner)** pomocí rozpoznávání tónů.  
-- ✅ Vytvořit **metronom** s nastavitelným tempem (BPM), zvukovým i vizuálním výstupem.  
-- ✅ Implementovat **databázi akordů** s vizualizací hmatníku (diagramy).  
-- ✅ Přidat systém pro **nahrávání a ukládání video tutoriálů**, které uživatel může přehrávat přímo v aplikaci.  
-- ✅ Navrhnout moderní **UI/UX design** s podporou dark/light režimu.  
-- ✅ Vést dokumentaci celého projektu včetně zdrojového kódu na GitHubu.  
+## Obsah
+- [Přehled projektu](#přehled-projektu)  
+- [Hlavní funkce](#hlavní-funkce)  
+- [Použité technologie](#použité-technologie)  
+- [Architektura řešení](#architektura-řešení)  
+- [Cíle projektu](#cíle-projektu)  
+- [English version](#english-version)
 
 ---
 
-## 🎶 Hlavní funkce
-- **Tuner** – rozpoznávání tónů pomocí mikrofonu.  
-- **Metronom** – nastavení tempa, vizuální “klik” i zvuk.  
-- **Akordy** – databáze základních i rozšířených akordů s grafickými diagramy hmatníku. 
-- **Dark/Light režim** – profesionální vzhled aplikace.
-- **Login** - Funkční login systém přes Firebase.
+## Přehled projektu
+Aplikace FretFly slouží jako digitální pomocník pro začínající i pokročilé kytaristy. Spojuje několik často používaných nástrojů do jednoho celku a eliminuje nutnost využívat více samostatných aplikací, které bývají omezené reklamou nebo placeným předplatným.
+
+Projekt klade důraz na:
+- srozumitelné uživatelské rozhraní,  
+- technicky korektní zpracování zvuku,  
+- stabilní ukládání uživatelských dat v cloudu.
 
 ---
 
-## 🛠 Použité programy a technologie
-- **Flutter (Dart)** – hlavní framework pro vývoj mobilní aplikace.  
-- **Android Studio / VS Code** – vývojové prostředí.  
-- **Git & GitHub** – správa verzí a dokumentace.  
-- **flutter_audio_capture** – přístup k mikrofonu.  
-- **pitch detection libraries** – rozpoznávání tónů pro ladění.  
-- **Firebase** – cloudové úložiště pro videa.  
+## Hlavní funkce
+- **Ladička** – detekce frekvence tónu pomocí metody *zero-crossing detection*.  
+- **Metronom** – nastavitelný rozsah BPM (40–240) a volba taktu.  
+- **Databáze akordů** – vizualizace hmatníku, vyhledávání a filtrování akordů.  
+- **Uživatelský účet** – autentizace přes e-mail a ukládání statistik.  
+- **Sledování pokroku** – počet naučených akordů, série aktivních dní.  
+- **Podpora světlého a tmavého režimu**.
 
+---
 
+## Použité technologie
+- **Flutter / Dart** – vývoj multiplatformní mobilní aplikace.  
+- **Firebase Authentication** – správa uživatelských účtů.  
+- **Cloud Firestore** – ukládání dat aplikace a statistik.  
+- **Microphone API** – snímání zvuku z mikrofonu zařízení.  
+- **Git** – správa verzí a vývoje projektu.
+
+---
+
+## Architektura řešení
+Aplikace je navržena jako **klientská mobilní aplikace** s napojením na cloudové služby Firebase. Logika zpracování zvuku probíhá lokálně na zařízení, zatímco uživatelská data jsou ukládána do vzdálené databáze, což umožňuje jejich synchronizaci mezi zařízeními a dlouhodobou archivaci.
+
+Důraz byl kladen na:
+- oddělení prezentační a aplikační logiky,  
+- čitelnost kódu a jeho budoucí rozšiřitelnost,  
+- minimalizaci závislostí na externích knihovnách.
+
+---
+
+## Cíle projektu
+Hlavním cílem projektu bylo vytvořit **funkční a technicky kvalitní mobilní aplikaci**, která:
+- kombinuje nejdůležitější nástroje pro kytaristy,  
+- je použitelná bez nutnosti placeného předplatného,  
+- slouží jako praktická ukázka schopností práce s Flutterem, Firebase a zpracováním zvuku v reálném čase.
+
+Projekt zároveň představuje komplexní studentskou práci propojující **vývoj mobilních aplikací, práci s audiem a návrh uživatelského rozhraní**.
+
+---
+
+# English version
+
+## FretFly – Mobile Application for Guitarists
+
+FretFly is a mobile application developed using **Flutter**, designed to provide guitarists with clear and functional tools for everyday practice. The project was created as a **final school thesis** and focuses on implementing essential musical utilities with an emphasis on usability, technical correctness, and modern application architecture.
+
+---
+
+## Table of Contents
+- [Project Overview](#project-overview)  
+- [Key Features](#key-features)  
+- [Technologies Used](#technologies-used)  
+- [System Architecture](#system-architecture)  
+- [Project Goals](#project-goals)
+
+---
+
+## Project Overview
+FretFly serves as a digital assistant for both beginner and advanced guitarists. It integrates several commonly used tools into a single application, eliminating the need for multiple standalone apps that are often limited by advertisements or paid subscriptions.
+
+The project emphasizes:
+- a clear and intuitive user interface,  
+- technically accurate audio processing,  
+- reliable cloud-based data storage.
+
+---
+
+## Key Features
+- **Tuner** – frequency detection using the *zero-crossing detection* method.  
+- **Metronome** – adjustable BPM range (40–240) and time signature selection.  
+- **Chord Database** – fretboard visualization with search and filtering options.  
+- **User Accounts** – email-based authentication and profile management.  
+- **Progress Tracking** – learned chords count and daily practice streaks.  
+- **Light and Dark Mode** support.
+
+---
+
+## Technologies Used
+- **Flutter / Dart** – cross-platform mobile application development.  
+- **Firebase Authentication** – user account management.  
+- **Cloud Firestore** – application data and statistics storage.  
+- **Microphone API** – audio input processing.  
+- **Git** – version control system.
+
+---
+
+## System Architecture
+The application is designed as a **client-side mobile solution** integrated with Firebase cloud services. Audio processing is performed locally on the device, while user data is stored in a remote database, enabling synchronization across devices and long-term persistence.
+
+Key architectural principles include:
+- separation of presentation and application logic,  
+- code readability and future extensibility,  
+- minimal reliance on external dependencies.
+
+---
+
+## Project Goals
+The main goal of the project was to create a **functional and technically sound mobile application** that:
+- combines essential tools for guitar practice,  
+- is usable without mandatory paid subscriptions,  
+- demonstrates practical skills in Flutter development, Firebase integration, and real-time audio processing.
+
+The project represents a comprehensive student work combining **mobile application development, audio signal processing, and user interface design**.
