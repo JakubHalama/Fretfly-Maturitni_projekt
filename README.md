@@ -3,7 +3,8 @@
 FretFly je mobilní aplikace vyvinutá v prostředí **Flutter**, jejímž cílem je poskytnout kytaristům přehledné a funkční nástroje pro každodenní cvičení. Projekt vznikl jako **maturitní práce** a zaměřuje se na implementaci klíčových hudebních pomůcek s důrazem na jednoduchost použití, technickou správnost a moderní architekturu aplikace.
 
 ---
-
+## Odkaz na videoprezentaci
+https://www.youtube.com/watch?v=cUAVxCkiSAY
 ## Obsah
 - [Přehled projektu](#přehled-projektu)  
 - [Hlavní funkce](#hlavní-funkce)  
