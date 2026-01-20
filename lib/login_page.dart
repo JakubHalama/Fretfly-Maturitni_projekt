@@ -44,8 +44,10 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
           debugPrint('AUTH: navigating to Home because user != null');
-          Navigator.of(context, rootNavigator: true)
-              .pushNamedAndRemoveUntil(HomePage.routeName, (route) => false);
+          Navigator.of(
+            context,
+            rootNavigator: true,
+          ).pushNamedAndRemoveUntil(HomePage.routeName, (route) => false);
         });
       }
     });
@@ -63,7 +65,9 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    debugPrint('LIFECYCLE state = $state, pendingAppleNavigation=$_pendingAppleNavigation');
+    debugPrint(
+      'LIFECYCLE state = $state, pendingAppleNavigation=$_pendingAppleNavigation',
+    );
     if (state == AppLifecycleState.resumed && _pendingAppleNavigation) {
       _pendingAppleNavigation = false;
       if (!mounted) return;
@@ -73,8 +77,10 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
   }
 
   void _navigateToHome() {
-    Navigator.of(context, rootNavigator: true)
-        .pushNamedAndRemoveUntil(HomePage.routeName, (route) => false);
+    Navigator.of(
+      context,
+      rootNavigator: true,
+    ).pushNamedAndRemoveUntil(HomePage.routeName, (route) => false);
   }
 
   Future<void> _onSubmit() async {
@@ -94,12 +100,16 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
     } on AuthException catch (e) {
       if (!mounted) return;
       setState(() => _isSubmitting = false);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.message)));
     } catch (e, st) {
       debugPrint('SIGNIN error: $e\n$st');
       if (!mounted) return;
       setState(() => _isSubmitting = false);
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Something went wrong')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Something went wrong')));
     }
   }
 
@@ -119,12 +129,16 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
     } on AuthException catch (e) {
       if (!mounted) return;
       setState(() => _isOauthSubmitting = false);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.message)));
     } catch (e, st) {
       debugPrint('GOOGLE: error $e\n$st');
       if (!mounted) return;
       setState(() => _isOauthSubmitting = false);
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Google sign-in failed')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Google sign-in failed')));
     }
   }
 
@@ -167,13 +181,17 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
       if (!mounted) return;
       setState(() => _isOauthSubmitting = false);
       debugPrint('APPLE: AuthException: ${e.message}');
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.message)));
     } catch (e, st) {
       _pendingAppleNavigation = false;
       debugPrint('APPLE: error $e\n$st');
       if (!mounted) return;
       setState(() => _isOauthSubmitting = false);
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Apple sign-in failed')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Apple sign-in failed')));
     }
   }
 
@@ -200,48 +218,37 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const SizedBox(height: 40),
-                    // Modern logo section with white background
+                    // Logo aplikace
                     Container(
-                      padding: const EdgeInsets.all(28),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.white.withOpacity(0.3),
-                          width: 2,
+                      width: 120,
+                      height: 120,
+                      decoration: const BoxDecoration(shape: BoxShape.circle),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(60),
+                        child: Image.asset(
+                          'assets/logo/logo-fretfly.png',
+                          fit: BoxFit.contain,
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 20,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: const Icon(
-                        Icons.music_note_rounded,
-                        size: 56,
-                        color: Colors.white,
                       ),
                     ),
-                    const SizedBox(height: 40),
+                    const SizedBox(height: 16),
                     Text(
                       'Vítej zpět!',
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                            fontWeight: FontWeight.w800,
-                            color: Colors.white,
-                            letterSpacing: -0.5,
-                          ),
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                        letterSpacing: -0.5,
+                      ),
                     ),
                     const SizedBox(height: 12),
                     Text(
                       'Přihlas se a pokračuj v učení',
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: Colors.white.withOpacity(0.9),
-                            fontSize: 16,
-                          ),
+                        color: Colors.white.withOpacity(0.9),
+                        fontSize: 16,
+                      ),
                     ),
                     const SizedBox(height: 48),
                     // White card with form
@@ -286,13 +293,18 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
                                 labelText: 'Heslo',
                                 prefixIcon: const Icon(Icons.lock_outline),
                                 suffixIcon: IconButton(
-                                  onPressed: () => setState(() => _isObscured = !_isObscured),
+                                  onPressed: () => setState(
+                                    () => _isObscured = !_isObscured,
+                                  ),
                                   icon: Icon(
-                                    _isObscured ? Icons.visibility : Icons.visibility_off,
+                                    _isObscured
+                                        ? Icons.visibility
+                                        : Icons.visibility_off,
                                   ),
                                 ),
                               ),
-                              validator: (value) => (value == null || value.isEmpty)
+                              validator: (value) =>
+                                  (value == null || value.isEmpty)
                                   ? 'Prosím zadej heslo'
                                   : null,
                             ),
@@ -302,7 +314,10 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
                               child: TextButton(
                                 onPressed: () {},
                                 style: TextButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 8,
+                                  ),
                                 ),
                                 child: Text(
                                   'Zapomněl jsi heslo?',
@@ -332,7 +347,10 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
                                         width: 24,
                                         child: CircularProgressIndicator(
                                           strokeWidth: 2.5,
-                                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                                Colors.white,
+                                              ),
                                         ),
                                       )
                                     : const Text(
@@ -355,7 +373,9 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
                                   ),
                                 ),
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                  ),
                                   child: Text(
                                     'nebo',
                                     style: TextStyle(
@@ -378,7 +398,9 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
                               children: [
                                 Expanded(
                                   child: OutlinedButton.icon(
-                                    onPressed: _isOauthSubmitting ? null : _onGoogle,
+                                    onPressed: _isOauthSubmitting
+                                        ? null
+                                        : _onGoogle,
                                     icon: Image.asset(
                                       'assets/icons/google.png',
                                       width: 20,
@@ -391,7 +413,9 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
                                       ),
                                     ),
                                     style: OutlinedButton.styleFrom(
-                                      padding: const EdgeInsets.symmetric(vertical: 16),
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 16,
+                                      ),
                                       side: BorderSide(
                                         color: Colors.grey.shade300,
                                         width: 1.5,
@@ -406,7 +430,9 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
                                 if (Platform.isIOS)
                                   Expanded(
                                     child: OutlinedButton.icon(
-                                      onPressed: _isOauthSubmitting ? null : _onApple,
+                                      onPressed: _isOauthSubmitting
+                                          ? null
+                                          : _onApple,
                                       icon: Image.asset(
                                         'assets/icons/apple.png',
                                         width: 18,
@@ -419,13 +445,17 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
                                         ),
                                       ),
                                       style: OutlinedButton.styleFrom(
-                                        padding: const EdgeInsets.symmetric(vertical: 16),
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 16,
+                                        ),
                                         side: BorderSide(
                                           color: Colors.grey.shade300,
                                           width: 1.5,
                                         ),
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(20),
+                                          borderRadius: BorderRadius.circular(
+                                            20,
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -448,9 +478,14 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
                           ),
                         ),
                         TextButton(
-                          onPressed: () => Navigator.of(context).pushNamed(SignUpPage.routeName),
+                          onPressed: () => Navigator.of(
+                            context,
+                          ).pushNamed(SignUpPage.routeName),
                           style: TextButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
                           ),
                           child: const Text(
                             'Registruj se',
@@ -458,8 +493,6 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
                               color: Colors.white,
                               fontWeight: FontWeight.w700,
                               fontSize: 16,
-                              decoration: TextDecoration.underline,
-                              decorationThickness: 2,
                             ),
                           ),
                         ),
