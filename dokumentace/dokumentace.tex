@@ -1,0 +1,1122 @@
+% ŠABLONA PRO PSANÍ ZÁVĚREČNÉ STUDIJNÍ PRÁCE
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Autor: Jakub Dokulil (kubadokulil99@gmail.com)
+% Tato šablona byla vytvořena tak, aby pomocí ní mohli v systému LaTeX soutěžící sázet své práce a zároveň odpovídala požadavkům na formátování vyplývajícím z wordové šablony umístěné na webu soc.cz.
+%
+\documentclass[12pt, a4paper,hidelinks
+%%oneside,      %% -- odkomentujte, pokud chcete svou práci mít pouze jednostrannou, mezera pro hřbet pak automaticky bude pouze na levé straně
+%%twoside,        %% -- pro oboustranné práce, mezera pro hřbet následně střídá strany.
+openright
+]{report}
+
+%% Nutné balíčky a nastavení
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Proměnné
+\newcommand\obor{INFORMAČNÍ TECHNOLOGIE} %% -- napiš číslo a název tvého oboru
+\newcommand\kodOboru{18-20-M/01} %% -- napiš číslo a název tvého oboru
+\newcommand\zamereni{se zaměřením na počítačové sítě a programování} %% -- napiš číslo a název tvého oboru
+\newcommand\skola{Střední škola průmyslová a umělecká, Opava} %% vyplň název školy
+\newcommand\trida{IT4} %% vyplň jméno svého konzultanta
+\newcommand\jmenoAutora{Jakub Halama}  %% vyplň své jméno
+\newcommand\skolniRok{2025/26} %% vyplň rok
+\newcommand\datumOdevzdani{5. 1. 2026} %% vyplň rok
+\newcommand\nazevPrace{FretFly: Kytarová aplikace ve frameworku Flutter} %% vyplň název své práce
+
+
+\title{\nazevPrace} %% -- Název tvé práce
+\author{\jmenoAutora} %% -- tvé jméno
+\date{\datumOdevzdani} %% -- rok
+
+\usepackage[top=2.5cm, bottom=2.5cm, left=3.5cm, right=1.5cm]{geometry} %% nastaví okraje, left -- vnitřní okraj, right -- vnější okraj
+
+\usepackage[czech]{babel} %% balík babel pro sazbu v češtině
+\usepackage[utf8]{inputenc} %% balíky pro kódování textu
+\usepackage[T1]{fontenc}
+\usepackage{cmap} %% balíček zajišťující, že vytvořené PDF bude prohledávatelné a kopírovatelné
+
+\usepackage{graphicx} %% balík pro vkládání obrázků
+
+\usepackage{subcaption} %% balíček pro vkládání podobrázků
+\usepackage{float}
+\usepackage[hidelinks]{hyperref} %% balíček, který v PDF vytváří odkazy
+
+\linespread{1.25} %% řádkování
+\setlength{\parskip}{0.5em} %% odsazení mezi odstavci
+
+
+\usepackage[pagestyles]{titlesec} %% balíček pro úpravu stylu kapitol a sekcí
+\titleformat{\chapter}[block]{\scshape\bfseries\LARGE}{\thechapter}{10pt}{\vspace{0pt}}[\vspace{-22pt}]
+\titleformat{\section}[block]{\scshape\bfseries\Large}{\thesection}{10pt}{\vspace{0pt}}
+\titleformat{\subsection}[block]{\bfseries\large}{\thesubsection}{10pt}{\vspace{0pt}}
+
+\usepackage{tocloft} % Balíček umožní přizpůsobit vzhled tabulky obsahu
+\setlength{\cftbeforechapskip}{0pt}  % Menší rozestup pro kapitoly
+\setlength{\cftbeforesecskip}{0pt}   % Menší rozestup pro sekce
+
+\setcounter{secnumdepth}{2}
+\setcounter{tocdepth}{1}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\fancyfoot[C]{\thepage}
+
+
+
+\usepackage{booktabs}
+\usepackage{microtype}
+\usepackage{url}
+
+%% Balíčky co se můžou hodit :) 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{pdfpages} %% Balíček umožňující vkládat stránky z PDF souborů, 
+
+\usepackage{upgreek} %% Balíček pro sazbu stojatých řeckých písmen, třeba u jednotky mikrometr. Například stojaté mí: \upmu, stojaté pí: \uppi
+
+\usepackage{amsmath}    %% Balíčky amsmath a amsfonts 
+\usepackage{amsfonts}   %% pro sazbu matematických symbolů
+\usepackage{esint}     %% pro sazbu různých integrálů (např \oiint)
+\usepackage{mathrsfs}
+\usepackage{helvet} % Helvet font
+\usepackage{mathptmx} % Times New Roman
+\usepackage{Oswald} % Oswald font
+
+
+%% makra pro sazbu matematiky
+\newcommand{\dif}{\mathrm{d}} %% makro pro sazbu diferenciálu, místo toho
+%% abych musel psát '\mathrm{d}' mi stačí napsat '\dif' což je mnohem 
+%% kratší a mohu si tak usnadnit práci
+
+\let\oldchapter\chapter
+\renewcommand{\chapter}{
+	\clearpage
+	\pagestyle{fancy}
+	\oldchapter
+}
+
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage[czech]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc} 
+
+\renewcommand{\lstlistingname}{Kód}% Listing -> Algorithm
+\renewcommand{\lstlistlistingname}{Seznam programových kódů}% List of Listings -> List of Algorithms
+
+
+%copied code start
+\definecolor{mediumgray}{rgb}{0.3, 0.4, 0.4}
+\definecolor{mediumblue}{rgb}{0.0, 0.0, 0.8}
+\definecolor{forestgreen}{rgb}{0.13, 0.55, 0.13}
+\definecolor{darkviolet}{rgb}{0.58, 0.0, 0.83}
+\definecolor{royalblue}{rgb}{0.25, 0.41, 0.88}
+\definecolor{crimson}{rgb}{0.86, 0.8, 0.24}
+
+\lstdefinestyle{csh}{
+	language=C,
+	backgroundcolor=\color{white},
+	basicstyle=\ttfamily,
+	breakatwhitespace=false,
+	breaklines=false,
+	captionpos=b,
+	columns=fullflexible,
+	commentstyle=\color{mediumgray}\upshape,
+	emph={},
+	emphstyle=\color{crimson},
+	extendedchars=true,  % requires inputenc
+	fontadjust=true,
+	frame=single,
+	identifierstyle=\color{black},
+	keepspaces=true,
+	keywordstyle=\color{mediumblue},
+	keywordstyle={[2]\color{darkviolet}},
+	keywordstyle={[3]\color{royalblue}},
+	literate=%
+	{á}{{\'a}}1 {č}{{\v{c}}}1 {ď}{{\v{d}}}1 {é}{{\'e}}1 {ě}{{\v{e}}}1
+	{í}{{\'i}}1 {ň}{{\v{n}}}1 {ó}{{\'o}}1 {ř}{{\v{r}}}1 {š}{{\v{s}}}1
+	{ť}{{\v{t}}}1 {ú}{{\'u}}1 {ů}{{\r{u}}}1 {ý}{{\'y}}1 {ž}{{\v{z}}}1,		
+	numbers=left,
+	numbersep=5pt,
+	numberstyle=\tiny\color{black},
+	rulecolor=\color{black},
+	showlines=true,
+	showspaces=false,
+	showstringspaces=false,
+	showtabs=false,
+	stringstyle=\color{forestgreen},
+	tabsize=2,
+	title=\lstname,
+	upquote=true  % requires textcomp	
+}
+% copied code end
+
+
+
+
+
+
+%% Bordel pro práci - můžeš smáznout :) 
+%%%%%%%%%%%%%%%%%%%
+
+\usepackage{lipsum} %% balíček který píše lipsum (nesmyslný text, který se používá pro kontrolu typografie)
+
+%% Začátek dokumentu
+%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+	
+	\pagestyle{empty}
+	\pagenumbering{Roman}
+	
+	\cleardoublepage
+
+%% Titulní stránka
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ 
+{\fontfamily{phv}\selectfont
+
+\begin{center}
+    \includegraphics[width=0.5\linewidth]{spskola.png}
+
+    \vspace{0.1cm} 
+
+    {\bfseries
+        \LARGE ZÁVĚREČNÁ STUDIJNÍ PRÁCE\\
+        \large dokumentace\\
+        \vspace{0.3cm}
+        \LARGE \nazevPrace\\[0.3cm]
+        \includegraphics[width=0.4\textwidth]{logo-fretfly.png}
+    }
+\end{center}
+
+}
+
+	\begin{table}[H]
+		\begin{tabular}{ll}
+			\textbf{Autor:} & \jmenoAutora\\ 
+			\textbf{Obor:} & \kodOboru { } \obor\\
+			\textbf{} & \zamereni\\
+			\textbf{Třída:} & \trida\\
+			\textbf{Školní rok:} & \skolniRok\\
+		\end{tabular}
+	\end{table}		
+}
+ 
+\newpage
+\cleardoublepage %% Zalomení dvojstránky
+	
+%% Stránka obsahující poděkování 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Poděkování - nepovinné
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	
+
+	
+	\vspace*{0.7\textheight} %% Vertikální mezeru je možné upravit
+
+%% Prohlášení - povinné
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	\noindent{\large{\bfseries{Prohlášení}\\}}  %% uprav si koncovky podle toho na jaký rod se cítíš, vypadá to pak lépe :) 
+	\noindent{Prohlašuji, že jsem závěrečnou práci vypracoval samostatně a uvedl veškeré použité 
+		informační zdroje.\\}
+	\noindent{Souhlasím, aby tato studijní práce byla použita k výukovým a prezentačním účelům na Střední průmyslové a umělecké škole v Opavě, Praskova 399/8.}
+	\vfill
+	\noindent{V Opavě \datumOdevzdani\\}
+	\noindent
+	\begin{minipage}{\linewidth}
+		\hspace{9.5cm} 
+		\begin{tabular}{@{}p{6cm}@{}}
+			\dotfill \\
+			Podpis autora
+		\end{tabular}
+	\end{minipage}
+	
+	\cleardoublepage %% Zalomení dvojstránky
+
+%% Stránka obsahující abstrakt (anotaci)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
+
+%% Abstrakt v češtině
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	\noindent{\Large{\bfseries{Abstrakt}\\}}
+Práce se zabývá tvorbou mobilní aplikace pro kytaristy s~nástroji pro učení a cvičení. Součástí práce byla implementace ladičky s~detekcí frekvence, metronomu s~nastavitelným tempem a~databáze kytarových akordů s vizualizací hmatníku. Výsledkem je funkční mobilní aplikace vytvořená ve Flutteru, která umožňuje kytaristům ladit nástroj pomocí mikrofonu, cvičit rytmus s~metronomem a procházet rozsáhlou databázi akordů s diagramy hmatníku. Aplikace obsahuje autentizační systém s podporou přihlášení přes email, uživatelský profil se statistikami pokroku včetně sledování naučených akordů a~počtu dní v řadě. Mezi hlavní funkce patří ladička s~analýzou frekvence pomocí zero-crossing detection, metronom s nastavitelným BPM (40–240) a~taktem, databáze akordů s vyhledáváním a filtrováním podle základního tónu, a~systém pro označování naučených akordů. Aplikace využívá Firebase pro autentizaci a~ukládání dat v~Cloud Firestore, podporuje dark mode a~light mode.
+
+
+	
+	\vspace{18pt}
+	
+	\noindent{\large{\bfseries{Klíčová slova}}}
+	
+	\noindent mobilní aplikace, Flutter, Firebase, kytara
+	
+	\vspace{18pt}
+
+%% Abstrakt v angličtině
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
+	\noindent{\Large{\bfseries{Abstract}}}
+	
+This thesis focuses on the development of a mobile application for guitarists that provides tools for learning and practice. The work included the implementation of a tuner with frequency detection, a metronome with adjustable tempo, and a database of guitar chords with fretboard visualization. The result is a fully functional mobile application developed in Flutter that allows guitarists to tune their instrument using the device microphone, practice rhythm with a~metronome, and browse an extensive chord database with fretboard diagrams.
+
+The application includes an authentication system with support for email sign-in, a user profile with progress statistics, including tracking learned chords and consecutive practice days. The main features include a tuner with frequency analysis using zero-crossing detection, a~metronome with adjustable BPM (40–240) and time signature, a~chord database with search and filtering by root note, and a system for marking learned chords. The application uses Firebase for authentication and data storage in Cloud Firestore and supports both dark and light modes.
+	
+	\vspace{18pt}
+	
+	\noindent{\large{\bfseries{Keywords}}}
+	
+	\noindent mobile application, Flutter, Firebase, guitar
+	
+	\cleardoublepage %% Zalomení stránky
+
+%% Stránka s generovaným obsahem
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
+	\setcounter{tocdepth}{2}
+	\tableofcontents %% Vygeneruje tabulku s obsahem
+
+	\pagenumbering{arabic} %% Nastavení způsobu číslování stránek (alternativy roman | Roman)
+	\setcounter{page}{1} %% Nastavení počitadla stránek
+
+%% Stránka s úvodem - povinná část
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%		
+	\chapter*{Úvod}
+	\addcontentsline{toc}{chapter}{Úvod}
+Mobilní~aplikace určené pro výuku hry na~hudební nástroje jsou dnes běžně využívány začínajícími i~pokročilými hudebníky. Ani já nejsem výjimkou, a~proto bylo cílem této práce vytvořit mobilní~aplikaci, která nabídne základní nástroje, jež jsou v~současnosti nedílnou součástí hry na~kytaru.
+
+Téma bylo zvoleno z~důvodu osobního zájmu o~hru na~kytaru a~zároveň snahy vytvořit praktickou~aplikaci s~reálným využitím. Projekt byl realizován ve~frameworku Flutter a~využívá platformu Firebase pro správu uživatelských dat a~službu Cloud~Firestore pro ukládání databáze kytarových akordů.
+
+Hlavním cílem práce bylo vytvořit mobilní~aplikaci FretFly, která nabídne základní nástroje pro efektivní cvičení na~kytaru. Mezi tyto nástroje patří ladička využívající mikrofon mobilního~zařízení, metronom s~nastavitelným tempem a~databáze kytarových akordů s~přehledným zobrazením prstokladu na~hmatníku. Součástí aplikace je také uživatelský~účet, který umožňuje ukládat informace o~pokroku, například naučené akordy nebo počet dní cvičení v~řadě.
+
+
+\chapter{Flutter a mobilní vývoj}
+
+\section{Co je to Flutter}
+\label{sec:co_je_to_flutter}
+Flutter je open-source~framework od~společnosti Google určený pro vývoj multiplatformních~aplikací. Umožňuje vytvářet mobilní~aplikace pro operační systémy Android a~iOS z~jedné společné kódové základny, což zjednodušuje vývoj i~následnou údržbu aplikace. Framework využívá programovací jazyk Dart a~je založen na~vlastním vykreslovacím enginu, který zajišťuje vysoký výkon a~plynulé uživatelské rozhraní.
+
+Flutter poskytuje rozsáhlou~sadu předpřipravených grafických komponent (widgetů), díky nimž je možné rychle vytvářet moderní a~responzivní uživatelská rozhraní. Výhodou je také funkce hot~reload, která umožňuje okamžitě zobrazit změny v~kódu bez nutnosti znovu spouštět celou~aplikaci, což výrazně urychluje vývoj.
+
+
+
+\section{Výhody Flutter frameworku}
+\label{sec:vyuziti_AR}
+
+
+\begin{itemize}
+	\item vývoj aplikací pro Android i iOS z jedné společné kódové základny,
+	\item vysoký výkon díky vlastnímu vykreslovacímu enginu,
+	\item moderní a konzistentní uživatelské rozhraní napříč platformami,
+	\item otevřený (open-source) framework s aktivní komunitou,
+	\item dobrá integrace s dalšími službami, například Firebase.
+\end{itemize}
+
+
+\section{Programovací jazyk Dart}
+\label{sec:programovaci_jazyk_dart}
+
+
+\subsection{Co je to Dart}
+Dart je moderní, objektově orientovaný programovací jazyk vyvinutý společností Google. Používá se především pro vývoj~aplikací ve~frameworku Flutter. Dart je navržen tak, aby byl jednoduchý na~čtení a~psaní, podporuje statické typování, asynchronní programování a~nabízí vysoký výkon díky kompilaci do~nativního kódu pro mobilní~i~webové~aplikace.
+
+
+\paragraph{Výhody}
+\begin{itemize}
+	\item Snadná integrace s Flutterem pro vývoj multiplatformních aplikací,
+	\item Podpora statického typování a objektově orientovaného programování, což zvyšuje bezpečnost a přehlednost kódu,
+	\item Možnost kompilace do nativního kódu pro vysoký výkon aplikací.
+\end{itemize}
+
+\paragraph{Nevýhody}
+\begin{itemize}
+	\item Menší komunita a méně dostupných knihoven než u populárnějších jazyků, například JavaScriptu,
+	\item Relativně méně zkušených vývojářů, což může komplikovat hledání odborné podpory,
+	\item Méně rozšířený mimo Flutter, takže se hodí spíše pro specifické projekty než pro obecný vývoj softwaru.
+\end{itemize}
+
+\subsection{Použití Dart ve Flutteru}
+Dart je primárním programovacím jazykem frameworku Flutter a~je klíčový pro tvorbu~aplikací v~tomto prostředí. Ve~Flutteru slouží Dart k~definici widgetů, což jsou základní stavební bloky uživatelského rozhraní. Každý vizuální prvek~aplikace, jako jsou tlačítka, texty nebo obrázky, je reprezentován widgetem, jehož chování a~vzhled je definován v~Dartu.
+
+Dart rovněž umožňuje efektivní práci s~asynchronními úlohami, což je při vývoji mobilních~aplikací důležité například při načítání dat z~databáze nebo z~internetu. Díky hot~reload ve~Flutteru lze změny v~Dart~kódu okamžitě zobrazit v~aplikaci, což výrazně urychluje vývoj a~testování.
+
+Použití Dartu ve~Flutteru přináší jednotnou a~přehlednou strukturu~kódu, snadnější údržbu a~možnost vytvářet multiplatformní~aplikace pro Android i~iOS z~jedné kódové základny. Jazyk také podporuje moderní programovací principy, jako je objektově orientované programování, statické typování a~modularita, které usnadňují tvorbu složitějších a~dobře udržovatelných~aplikací.
+
+
+	
+
+\chapter {Funkce mobilní aplikace FretFly}
+
+\section {Metronom}
+\label{metronom}
+Metronom je nástroj pro udržování konstantního~tempa při cvičení na~kytaru. Pomáhá držet správné~tempo, a~zároveň je to skvělý pomocník pro trénink~rytmu. Při vytváření jsem měl trošku problém s~implementací zvukového "tiku", který měl znázorňovat jednu~dobu. Nakonec ale metronom funguje vcelku slušně, a~ikdyž to není ještě úplně stoprocentní, svůj účel držení~tempa splňuje.
+
+
+\subsection {Účel a funkce metronomu}
+Metronom v aplikaci \textbf{FretFly} poskytuje následující funkce:
+
+\begin{itemize}
+    \item \textbf{Nastavení tempa v rozsahu 40--240 BPM} \\
+    Uživatel si může zvolit tempo podle náročnosti cvičení, od pomalého procvičování až po rychlá rytmická cvičení.
+
+    \item \textbf{Výběr taktu (2/4, 3/4, 4/4, 6/4)} \\
+    Metronom podporuje více taktových označení, což umožňuje přizpůsobení různým hudebním stylům a skladbám.
+
+    \item \textbf{Zvukový výstup s odlišením první doby} \\
+    První doba v taktu je zvýrazněna odlišným zvukem, což usnadňuje orientaci v rytmu.
+
+    \item \textbf{Vizuální indikátor aktuální doby} \\
+    Grafický prvek zobrazuje průběh taktu a aktuální dobu, což je užitečné při cvičení bez zvuku nebo v hlučném prostředí.
+
+    \item \textbf{Tap tempo pro nastavení BPM poklepáním} \\
+    Uživatel může nastavit tempo opakovaným poklepáním na obrazovku podle rytmu konkrétní skladby.
+\end{itemize}
+
+
+\subsection{Technická implementace}
+
+Metronom je v aplikaci \textbf{FretFly} implementován jako \texttt{StatefulWidget} s názvem
+\texttt{MetronomePage}, který spravuje svůj stav pomocí několika klíčových proměnných. Tyto
+proměnné určují chování metronomu, jeho aktuální nastavení a průběh přehrávání.
+
+\begin{itemize}
+    \item \textbf{\_isPlaying} \\
+    Logická proměnná indikující, zda je metronom aktuálně spuštěn, nebo zastaven.
+
+    \item \textbf{\_bpm} \\
+    Proměnná uchovávající aktuální tempo metronomu v úderech za minutu (BPM), přičemž
+    podporovaný rozsah je 40 až 240 BPM.
+
+    \item \textbf{\_beatsPerBar} \\
+    Určuje počet dob v jednom taktu. Hodnoty odpovídají podporovaným taktům
+    (2, 3, 4 nebo 6).
+
+    \item \textbf{\_currentBeat} \\
+    Sleduje aktuální dobu v rámci taktu, přičemž nabývá hodnot od 1 do hodnoty
+    \texttt{\_beatsPerBar}.
+
+    \item \textbf{\_timer} \\
+    Periodický časovač, který zajišťuje pravidelné spouštění jednotlivých dob metronomu
+    na základě nastaveného tempa.
+\end{itemize}
+
+
+\subsection{Výpočet intervalu mezi dobami}
+
+Interval mezi jednotlivými dobami metronomu je odvozen z aktuálně nastaveného tempa,
+které je udáváno v jednotkách BPM (beats per minute). Jelikož jedna minuta odpovídá
+60\,000 milisekundám, lze interval mezi jednotlivými dobami vypočítat podle následujícího
+vzorce:
+
+\[
+\text{interval} = \frac{60000}{\text{BPM}} \; \text{ms}
+\]
+
+Například při nastaveném tempu 120 BPM vychází interval mezi jednotlivými dobami na
+500~ms, tedy 0{,}5 sekundy. Tento interval určuje, jak často je spuštěna další doba
+metronomu.
+
+V aplikaci je výpočet intervalu a spuštění metronomu realizováno v metodě
+\texttt{\_startMetronome()}, která nejprve okamžitě přehraje první dobu a následně
+nastaví periodický časovač pro další doby. Implementace této metody je uvedena níže:
+
+\begin{lstlisting}[style=csh, caption={Ukázka kódu pro spuštění metronomu.}]
+void _startMetronome() {
+  _playBeat();
+
+  final interval = Duration(
+    milliseconds: (60000 / _bpm).round(),
+  );
+
+  _timer = Timer.periodic(interval, (timer) {
+    _playBeat();
+  });
+}
+\end{lstlisting}
+
+Metoda \texttt{\_startMetronome()} nejprve zavolá funkci \texttt{\_playBeat()}, čímž zajistí
+okamžité přehrání první doby bez zpoždění. Následně je vypočítán časový interval na základě
+aktuální hodnoty BPM a vytvořen objekt třídy \texttt{Duration}. Tento interval je následně
+použit při vytvoření periodického časovače \texttt{Timer.periodic}, který v pravidelných
+časových intervalech spouští další doby metronomu.
+
+Tímto způsobem je zajištěno přesné a stabilní časování jednotlivých úderů metronomu
+po celou dobu jeho běhu.
+
+\subsection{Zvukový výstup}
+
+Zvukový výstup metronomu je realizován pomocí balíčku \texttt{just\_audio}, který umožňuje
+přesné a nízkolatenční přehrávání zvukových souborů. Pro zajištění jasného rozlišení první
+doby v taktu jsou použity dvě samostatné instance třídy \texttt{AudioPlayer}.
+
+\begin{itemize}
+    \item \textbf{\_accentPlayer} \\
+    Slouží k přehrávání první doby v taktu (akcentované doby).
+
+    \item \textbf{\_regularPlayer} \\
+    Používá se pro přehrávání ostatních, neakcentovaných dob.
+\end{itemize}
+
+První doba v taktu je zvukově i hapticky zvýrazněna, aby byla pro uživatele snadno
+rozpoznatelná. Toto zvýraznění je realizováno kombinací změny parametrů přehrávání
+a silnější haptické odezvy:
+
+\begin{itemize}
+    \item přehrávání se zvýšenou rychlostí (\texttt{speed = 2.0}), čímž dojde ke zvýšení
+    výšky tónu,
+    \item přehrávání s plnou hlasitostí (\texttt{volume = 1.0}),
+    \item silnější haptická odezva pomocí metody
+    \texttt{HapticFeedback.mediumImpact()}.
+\end{itemize}
+
+Ostatní doby jsou přehrávány s méně výrazným zvukovým i haptickým projevem, aby bylo
+zachováno jasné rozlišení akcentované doby:
+
+\begin{itemize}
+    \item přehrávání při standardní rychlosti (\texttt{speed = 1.0}),
+    \item snížená hlasitost (\texttt{volume = 0.7}),
+    \item lehká haptická odezva pomocí metody
+    \texttt{HapticFeedback.lightImpact()}.
+\end{itemize}
+
+Zvukový soubor metronomu je uložen v adresáři
+\texttt{assets/sounds/sound-effect-hd.mp3} a je načten při inicializaci widgetu
+\texttt{MetronomePage}. Tím je zajištěno, že zvuk je připraven k okamžitému přehrání bez
+zbytečného zpoždění během běhu metronomu.
+
+Použití oddělených přehrávačů pro akcentované a neakcentované doby umožňuje nezávislé
+nastavení parametrů přehrávání a přispívá k lepší čitelnosti rytmu a celkové uživatelské
+zkušenosti při cvičení.
+
+
+\subsection{Tap Tempo funkce}
+
+Funkce Tap Tempo umožňuje uživateli nastavit tempo metronomu (BPM) manuálně
+poklepáním na tlačítko v požadovaném rytmu. Tato metoda je vhodná zejména v situacích,
+kdy uživatel nezná přesnou hodnotu BPM, ale dokáže tempo intuitivně zadat.
+
+Algoritmus Tap Tempo pracuje s časovými značkami jednotlivých poklepů a skládá se
+z následujících kroků:
+
+\begin{enumerate}
+    \item \textbf{Ukládání časových značek} \\
+    Při každém poklepu je aktuální čas uložen do seznamu \texttt{\_tapTimes}.
+    Algoritmus uchovává maximálně čtyři poslední poklepy, přičemž starší hodnoty
+    jsou postupně odstraňovány.
+
+    \item \textbf{Výpočet intervalů mezi poklepy} \\
+    Z uložených časových značek jsou vypočítány časové rozdíly mezi jednotlivými
+    poklepy v milisekundách.
+
+    \item \textbf{Výpočet průměrného intervalu} \\
+    Z vypočtených intervalů je určen průměrný interval, který slouží ke stabilizaci
+    výsledného tempa a omezení vlivu nepřesného poklepu.
+
+    \item \textbf{Přepočet na BPM} \\
+    Průměrný interval je následně převeden na hodnotu BPM podle vztahu:
+    
+    \[
+    BPM = \frac{60000}{\text{průměrný interval v ms}}
+    \]
+
+    \item \textbf{Omezení výsledné hodnoty} \\
+    Vypočtená hodnota BPM je omezena na povolený rozsah 40–240 BPM, aby odpovídala
+    funkčním limitům metronomu.
+\end{enumerate}
+
+Pro zajištění správné funkce je implementováno také časové omezení. Pokud uživatel
+neprovede další poklep po dobu delší než dvě sekundy, seznam časových značek
+\texttt{\_tapTimes} je automaticky vymazán a nový výpočet začíná od začátku.
+
+Vlastní implementace Tap Tempo je realizována metodou \texttt{\_tapTempo()}, jejíž
+zdrojový kód je uveden níže:
+
+\begin{lstlisting}[style=csh, caption={Ukázka kódu pro funkci Tap Tempo.}]
+void _tapTempo() {
+  final now = DateTime.now();
+  _tapTimes.add(now);
+
+  if (_tapTimes.length > 4) {
+    _tapTimes.removeAt(0);
+  }
+
+  if (_tapTimes.length >= 2) {
+    final intervals = <int>[];
+
+    for (int i = 1; i < _tapTimes.length; i++) {
+      intervals.add(
+        _tapTimes[i]
+            .difference(_tapTimes[i - 1])
+            .inMilliseconds,
+      );
+    }
+
+    final avgInterval =
+        intervals.reduce((a, b) => a + b) / intervals.length;
+
+    final newBpm =
+        (60000 / avgInterval).round().clamp(40, 240);
+
+    setState(() {
+      _bpm = newBpm;
+
+      if (_isPlaying) {
+        _stopMetronome();
+        _startMetronome();
+      }
+    });
+  }
+}
+\end{lstlisting}
+
+
+Po změně hodnoty BPM je metronom v případě aktivního přehrávání automaticky restartován,
+aby se nové tempo okamžitě projevilo v běhu aplikace.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.4\textwidth]{metronom.png}
+  \caption{Ukázka rozhraní Metronomu.}
+  \label{fig:signup_page}
+\end{figure}
+
+\clearpage
+
+\section {Ladička}
+\label{ladicka}
+Ladička je nástroj, který dokáže přesně naladit každou~strunu bez větší~námahy. Na trhu už jsou nějakou dobu klasické ladičky - malá plastová~zařízení s~analogovým, ale už i~s~digitálním~displejem, které se na~kytaru fyzicky připnou a~naladí ji. Myslím si ale, že v~dnešní době už drtivá většina muzikantů (minimálně těch amatérských) zvolí levnější~variantu a~to ladičku v~mobilu. Já sám jsem nikdy fyzickou~ladičku nevlastnil a~neměl jsem s~mobilní~verzí sebemenší problém. Proto v~mé~aplikaci nemohla chybět.
+
+
+\subsection{Standardní ladění kytary}
+
+Standardní ladění kytary je označováno jako \textbf{E-A-D-G-B-E} a představuje nejběžnější způsob ladění pro šestistrunnou kytaru. Každá struna má přesně definovanou frekvenci, která slouží jako cílový tón při ladění:
+
+\begin{center}
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{Struna} & \textbf{Pořadí} & \textbf{Frekvence [Hz]} \\
+\hline
+E6 & 6 (nejtlustší) & 82,41 \\
+A5 & 5 & 110,00 \\
+D4 & 4 & 146,83 \\
+G3 & 3 & 196,00 \\
+B2 & 2 & 246,94 \\
+E1 & 1 (nejtenčí) & 329,63 \\
+\hline
+\end{tabular}
+\end{center}
+
+Tyto frekvence jsou v aplikaci uloženy v konstantě \_stringFrequencies a slouží pro porovnání s detekovanou frekvencí během ladění:
+
+\begin{verbatim}
+static const Map<String, double> _stringFrequencies = {
+  'E6': 82.41,
+  'A5': 110.00,
+  'D4': 146.83,
+  'G3': 196.00,
+  'B2': 246.94,
+  'E1': 329.63
+};
+\end{verbatim}
+
+Digitální ladička porovnává detekovaný tón s touto referenční hodnotou a poskytuje okamžitou vizuální zpětnou vazbu uživateli, což umožňuje přesné a rychlé ladění.
+
+
+\subsection{Technická implementace}
+
+Ladička v aplikaci je implementována jako interaktivní stránka (\textit{StatefulWidget} TunerPage), která spravuje stav nahrávání a analýzy zvuku. Hlavními prvky jsou:
+
+\begin{itemize}
+    \item \textbf{AudioRecorder} – nástroj pro záznam zvuku z mikrofonu.
+    \item \textbf{Indikátor nahrávání} – ukazuje, zda aplikace právě nahrává.
+    \item \textbf{Detekovaný tón a frekvence} – aktuálně zaznamenaný tón (E, A, D, G, B) a jeho frekvence v Hz.
+    \item \textbf{Odchylka od cílového tónu} – vyjádřená v centech, ukazuje, o kolik je struna mimo ladění.
+    \item \textbf{Vybraná struna} – možnost zaměřit se na konkrétní strunu.
+\end{itemize}
+
+\subsubsection*{Ukázka implementace}
+
+\begin{lstlisting}[style=csh, caption={Ukázka kódu inicializace ladičky a jejích parametrů.}]
+// Inicializace hlavních proměnných
+final AudioRecorder _recorder = AudioRecorder();
+bool _isRecording = false;
+String? _detectedNote;
+double _detectedFrequency = 0.0;
+double _deviation = 0.0; // odchylka v centech
+String? _selectedString;
+Timer? _analysisTimer;
+
+// Technické parametry zpracování zvuku
+static const int sampleRate = 44100;
+static const int bufferSize = 4096;
+\end{lstlisting}
+
+
+\noindent
+Tento kód ukazuje, jak aplikace uchovává informace o nahrávání a analyzovaném zvuku. Každých 200 ms probíhá analýza nahrávky, která zjišťuje aktuální frekvenci a odchylku od cílového tónu. Díky tomu uživatel okamžitě vidí, zda je struna naladěna správně, nebo zda je potřeba ji napnout či uvolnit.
+
+\subsubsection*{Technické parametry}
+\begin{itemize}
+    \item \textbf{Vzorkovací frekvence:} 44100 Hz.
+    \item \textbf{Velikost bufferu:} 4096 vzorků.
+    \item \textbf{Formát:} PCM16 (16-bit signed integer).
+    \item \textbf{Interval analýzy:} každých 200 ms.
+\end{itemize}
+
+Tyto parametry zajišťují přesné a rychlé zachycení frekvence každé struny a umožňují okamžitou vizuální zpětnou vazbu uživateli.
+
+\subsection{Záznam zvuku a detekce frekvence}
+
+Záznam zvuku v aplikaci probíhá pomocí třídy \texttt{AudioRecorder}, která zachycuje signál z mikrofonu. Nahrávání je nastaveno s parametry:
+
+\begin{itemize}
+    \item \textbf{Formát:} PCM16 (16-bit signed integer).
+    \item \textbf{Vzorkovací frekvence:} 44100 Hz.
+    \item \textbf{Kanály:} mono (jediný kanál).
+\end{itemize}
+
+Periodická analýza probíhá každých 200 ms, aby aplikace mohla průběžně detekovat aktuální tón. Ukázka inicializace nahrávání v kódu:
+
+\begin{lstlisting}[style=csh, caption={Ukázka kódu spuštění záznamu zvuku.}]
+await _recorder.start(
+  const RecordConfig(
+    encoder: AudioEncoder.pcm16bits,
+    sampleRate: sampleRate,
+    numChannels: 1,
+  ),
+  path: _recordingPath!,
+);
+
+// Periodická analýza zvuku každých 200 ms
+_analysisTimer = Timer.periodic(
+  const Duration(milliseconds: 200),
+  (timer) {
+    _analyzeAudioFile();
+  },
+);
+\end{lstlisting}
+
+
+Detekce frekvence využívá princip \textbf{zero-crossing detection}, což je metoda, která počítá, kolikrát signál prochází nulovou hodnotou. Z tohoto počtu a délky nahrávky lze vypočítat frekvenci tónu. Přehled hlavních kroků:
+
+\begin{itemize}
+    \item Normalizace vzorků – odstranění posunu signálu (DC offset).
+    \item Počítání průchodů nulou s filtrováním šumu (threshold).
+    \item Výpočet frekvence: počet průchodů nulou dělený délkou vzorku.
+    \item Filtrování nereálných frekvencí – pro kytaru platí rozsah 50–500 Hz.
+\end{itemize}
+
+Ukázka funkce pro detekci frekvence:
+
+\begin{lstlisting}[style=csh, caption={Ukázka kódu detekce frekvence metodou průchodu nulou.}]
+double _detectFrequency(List<int> samples) {
+  final normalized = _normalizeSamples(samples);
+  const threshold = 100;
+  int zeroCrossings = 0;
+  bool wasPositive = normalized[0] > 0;
+
+  for (int i = 1; i < normalized.length; i++) {
+    final current = normalized[i];
+    if (wasPositive && current < -threshold) {
+      zeroCrossings++;
+      wasPositive = false;
+    } else if (!wasPositive && current > threshold) {
+      zeroCrossings++;
+      wasPositive = true;
+    }
+  }
+
+  final duration = samples.length / sampleRate;
+  final frequency = (zeroCrossings / 2) / duration;
+
+  if (frequency < 50 || frequency > 500) {
+    return 0.0;
+  }
+
+  return frequency;
+}
+\end{lstlisting}
+
+
+Tento princip umožňuje aplikaci rozpoznat aktuálně hraný tón a jeho frekvenci, což je základ pro následné vyhodnocení odchylky a vizuální indikaci ladění.
+
+
+\subsection{Výpočet odchylky a vizuální indikátory}
+
+Po detekci frekvence hraného tónu aplikace vypočítá odchylku od cílového tónu v \textbf{centech} (1 cent = 1/100 půltónu). Tento způsob měření umožňuje přesně vyjádřit, jak moc je tón nad nebo pod ideálním laděním.
+
+\begin{lstlisting}[style=csh, caption={Ukázka kódu pro výpočet odchylky tónu v centech.}]
+double _calculateDeviation(double detectedFreq, double targetFreq) {
+  if (detectedFreq <= 0 || targetFreq <= 0) {
+    return 0.0;
+  }
+
+  final cents =
+      1200 * (log(detectedFreq / targetFreq) / log(2));
+
+  return cents;
+}
+\end{lstlisting}
+
+Matematicky lze odchylku vyjádřit vzorcem:
+
+\[
+\text{cents} = 1200 \times \frac{\log(f_{\text{detekovaná}} / f_{\text{cílová}})}{\log(2)}
+\]
+
+Pro intuitivní vizuální zpětnou vazbu aplikace používá barevné indikátory:
+
+\begin{itemize}
+    \item \textbf{Zelená:} odchylka menší než ±5 centů – tón je perfektně naladěn.
+    \item \textbf{Oranžová:} odchylka mezi ±5 a ±20 centy – tón je blízko ideálu.
+    \item \textbf{Červená:} odchylka větší než ±20 centů – tón je výrazně mimo ladění.
+\end{itemize}
+
+Aplikace zobrazuje:
+
+\begin{itemize}
+    \item Detekovaný tón a jeho frekvenci v Hz
+    \item Vizuální indikátor ladění s posuvníkem
+    \item Barevný indikátor odchylky (zelená, oranžová, červená)
+    \item Textové instrukce pro ladění – napnout nebo uvolnit strunu
+\end{itemize}
+
+Tento přístup zajišťuje, že uživatel okamžitě vidí, zda je struna správně naladěna, a dostává jasné instrukce, jak postupovat.
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.4\textwidth]{ladicka.png}
+  \caption{Ukázka rozhraní Ladičky.}
+  \label{fig:signup_page}
+\end{figure}
+
+\section{Databáze akordů}
+\label{sec:databaze_akordu}
+Myslím si, že trošku méně atraktivnější část~aplikace, ale rozhodně nezbytná. Mít akordy na~jednom uspořádaném~místě je určitě příjemné. Proto jsem chtěl jednu takovou alespoň s~pár~akordy i~v~mé~aplikaci. Na začátku jsem plánoval, že udělám databázi lokální, ale jelikož jsem se rozhodl použít Firebase pro ukládání přihlášených~uživatelů, použil jsem Firebase i~pro vytvoření modelu pro databázi~akordů.
+
+
+\newpage
+\subsection{Model akordu}
+
+Akord je v aplikaci reprezentován třídou \texttt{Chord}, která obsahuje následující vlastnosti:
+
+\begin{lstlisting}[style=csh, caption={Ukázka třídy pro reprezentaci akordu.}]
+class Chord {
+  final String id;
+  final String name;
+  final String category;
+  final List<int> fingering;   // [0, 3, 2, 0, 1, 0] pro struny E-A-D-G-B-E
+  final int position;          // pozice na hmatníku (1 = první pražec)
+  final bool hasBarre;
+  final int? barreFret;
+  final String? description;
+  final List<String> tags;
+  final String difficulty;     // "beginner", "intermediate", "advanced"
+}
+\end{lstlisting}
+
+
+\noindent
+Význam jednotlivých vlastností:
+
+\begin{itemize}
+  \item \textbf{id}: unikátní identifikátor akordu.
+  \item \textbf{name}: název akordu (např. C, G7, Am).
+  \item \textbf{category}: kategorie akordu (např. dur, moll, sedmý).
+  \item \textbf{fingering}: pole pozic prstů pro jednotlivé struny (E-A-D-G-B-E):
+    \begin{itemize}
+      \item \texttt{0} = otevřená struna
+      \item \texttt{-1} = neznělá struna
+      \item \texttt{1-24} = pozice prstu na pražci
+    \end{itemize}
+  \item \textbf{position}: pozice akordu na hmatníku (1 = první pražec).
+  \item \textbf{hasBarre}: zda akord obsahuje barré.
+  \item \textbf{barreFret}: pokud je barré, na kterém pražci.(Barré je kytarová technika, ve které ukazováček stiskne více strun najednou)
+  \item \textbf{description}: volitelný text s vysvětlením akordu.
+  \item \textbf{tags}: seznam tagů pro vyhledávání nebo filtrování akordů.
+  \item \textbf{difficulty}: obtížnost akordu – \texttt{"beginner"}, \texttt{"intermediate"} nebo \texttt{"advanced"}.
+\end{itemize}
+
+
+\subsection{ChordsService}
+
+\textit{ChordsService} je specializovaná služba poskytující jednotný přístup k databázi akordů umístěné v \textit{Cloud Firestore}. Tato služba centralizuje operace s akordy, což umožňuje snadné načítání, vyhledávání a filtrování akordů napříč aplikací. Použití služby zajišťuje, že všechny komponenty aplikace pracují s konzistentními daty a snižuje duplicitu kódu.
+
+Hlavní funkce \textit{ChordsService} zahrnují:
+
+\begin{itemize}
+    \item Načtení kompletního seznamu akordů.
+    \item Vyhledávání akordů podle názvu.
+    \item Filtrování akordů podle kategorie (např. mollové, durové).
+    \item Filtrování akordů podle obtížnosti (začátečník, středně pokročilý, pokročilý).
+\end{itemize}
+
+\begin{lstlisting}[style=csh, caption={Ukázka implementace služby ChordsService.}]
+class ChordsService {
+  static final ChordsService _instance = ChordsService._internal();
+  factory ChordsService() => _instance;
+
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  static const String _collection = 'chords';
+
+  // Načte všechny akordy z kolekce
+  Stream<List<Chord>> getAllChords() {
+    return _firestore
+        .collection(_collection)
+        .orderBy('name')
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => Chord.fromMap(doc.data(), doc.id))
+            .toList());
+  }
+
+  // Vyhledávání akordů podle názvu
+  Stream<List<Chord>> searchChords(String query) {
+    if (query.isEmpty) return getAllChords();
+
+    return _firestore
+        .collection(_collection)
+        .where('name', isGreaterThanOrEqualTo: query)
+        .where('name', isLessThan: '${query}z')
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => Chord.fromMap(doc.data(), doc.id))
+            .toList());
+  }
+}
+\end{lstlisting}
+
+\subsection{Inicializace databáze}
+
+Při prvním spuštění aplikace je nezbytné inicializovat databázi akordů s předdefinovanou sadou základních akordů. Tento proces zajistí, že aplikace má ihned k dispozici všechny potřebné akordy, které mohou být dále načítány a filtrovány pomocí služby \textit{ChordsService}.
+
+Databáze obsahuje akordy z kategorií \textit{Major}, \textit{Minor} a \textit{Seventh} s různými úrovněmi obtížnosti, což umožňuje uživatelům od začátečníků po pokročilé pohodlné používání aplikace.
+
+\begin{lstlisting}[style=csh, caption={Ukázka inicializace databáze akordů.}]
+Future<void> initializeChords() async {
+  final chords = [
+    Chord(
+      id: 'c_major',
+      name: 'C',
+      category: 'Major',
+      fingering: [0, 1, 0, 2, 1, 0],
+      position: 1,
+      tags: ['major', 'open', 'beginner'],
+      difficulty: 'beginner',
+    ),
+    // ... další akordy
+  ];
+
+  for (final chord in chords) {
+    final docRef = _firestore.collection(_collection).doc(chord.id);
+    final existing = await docRef.get();
+    if (!existing.exists) {
+      await docRef.set(chord.toMap());
+    }
+  }
+}
+\end{lstlisting}
+
+\textbf{Poznámka:} Tento postup zajišťuje, že každý akord je v databázi pouze jednou a nedochází k duplicitám. Inicializace podporuje snadnou rozšiřitelnost – nové akordy mohou být přidány do seznamu a automaticky synchronizovány s Firestore.
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.4\textwidth]{databaze_akordu.png}
+  \caption{Ukázka rozhraní databáze s akordy.}
+  \label{fig:signup_page}
+\end{figure}
+
+\chapter{Přihlašovací systém}
+\label{funkce_aplikace}
+Jak už jsem zmínil u~kapitoly 2.3 Databáze~akordů, pro ukládání~uživatelů jsem použil Firebase~Authentication. Původně jsem zamýšlel, že zprovozním i~přihlášení přes Google a~Apple, nakonec jsem od toho hlavně kvůli nedostatku~času upustil, a~tak je v~aplikaci pouze přihlášení přes e-mail. Do budoucna bych však přihlášení přes Google a~Apple moc rád do~aplikace přidal.
+
+
+\section{AuthService}
+
+\textit{AuthService} je singletonová služba, která centralizuje veškeré operace související s autentizací uživatelů v aplikaci. Zajišťuje bezpečné přihlášení, registraci a správu přihlášeného uživatele.
+
+Služba obsahuje následující funkcionality:
+\begin{itemize}
+  \item Přihlášení pomocí e-mailu a hesla
+  \item Registrace nového uživatele
+  \item Odhlášení uživatele
+\end{itemize}
+
+\begin{lstlisting}[style=csh, caption={Ukázka implementace přihlášení přes e-mail a heslo.}]
+class AuthService {
+  AuthService._();
+  static final AuthService instance = AuthService._();
+
+  Future<void> signIn({
+    required String email,
+    required String password
+  }) async {
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email.trim(),
+        password: password,
+      );
+      
+      await StreakService().updateOnLogin();
+
+      final p = await _prefs;
+      await p.setString(
+        _keyCurrentUser,
+        FirebaseAuth.instance.currentUser?.email ?? '',
+      );
+    } on FirebaseAuthException catch (e) {
+      throw AuthException(_mapFirebaseError(e));
+    }
+  }
+}
+\end{lstlisting}
+
+\textbf{Poznámka:} Centralizace autentizace v \textit{AuthService} zajišťuje jednotnou logiku přihlášení a snadnou správu chyb napříč celou aplikací.
+
+\section{LoginPage}
+
+\textit{LoginPage} poskytuje uživateli rozhraní pro přihlášení do aplikace s validací formuláře. Zajišťuje bezpečný vstup uživatelských údajů a zobrazení chybových hlášení.
+
+Stránka obsahuje:
+\begin{itemize}
+  \item Formulář s validací e-mailu a hesla
+  \item Odkaz na registraci
+  \item Zobrazení chybových zpráv
+\end{itemize}
+
+\begin{lstlisting}[style=csh, caption={Ukázka zpracování přihlášení uživatele.}]
+Future<void> _onSubmit() async {
+  if (!_formKey.currentState!.validate()) return;
+  setState(() => _isSubmitting = true);
+
+  try {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+    await AuthService.instance.signIn(email: email, password: password);
+
+    if (!mounted) return;
+    setState(() => _isSubmitting = false);
+    _navigateToHome();
+  } on AuthException catch (e) {
+    if (!mounted) return;
+    setState(() => _isSubmitting = false);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(e.message))
+    );
+  }
+}
+\end{lstlisting}
+
+\textbf{Poznámka:} Validace a ošetření chyb zajišťují, že uživatel získá okamžitou zpětnou vazbu při nesprávném zadání údajů.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.4\textwidth]{login_page.png}
+  \caption{Ukázka rozhraní LoginPage.}
+  \label{fig:signup_page}
+\end{figure}
+
+
+\section{SignUpPage}
+
+\textit{SignUpPage} poskytuje uživateli rozhraní pro registraci nového účtu. Formulář zajišťuje validaci vstupních údajů a ošetření chyb.
+
+Stránka obsahuje:
+\begin{itemize}
+  \item Formulář s validací:
+    \begin{itemize}
+      \item Jméno (povinné)
+      \item E-mail (správný formát)
+      \item Heslo (minimální délka)
+      \item Potvrzení hesla (shoda s heslem)
+    \end{itemize}
+  \item Zobrazení chybových zpráv
+\end{itemize}
+
+\begin{lstlisting}[style=csh, caption={Ukázka zpracování registrace nového uživatele.}]
+Future<void> _onSubmit() async {
+  if (!_formKey.currentState!.validate()) return;
+
+  try {
+    await AuthService.instance.signUp(
+      name: _nameController.text,
+      email: _emailController.text,
+      password: _passwordController.text,
+    );
+    Navigator.of(context).pop();
+  } on AuthException catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(e.message))
+    );
+  }
+}
+\end{lstlisting}
+
+\textbf{Poznámka:} Validace a ošetření chyb zajišťují bezpečný a přehledný proces registrace.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.4\textwidth]{signup_page.png}
+  \caption{Ukázka rozhraní SignUpPage.}
+  \label{fig:signup_page}
+\end{figure}
+
+
+\newpage
+
+
+\chapter*{Závěr}
+\addcontentsline{toc}{chapter}{Závěr}
+Cílem projektu bylo vytvořit mobilní~aplikaci, která bude obsahovat základní~nástroje pro kytaristy. Aplikace je postavená na~frameworku Flutter, a~je celý napsaný v~programovacím~jazyku Dart. Databáze je řešena přes Firestore~Database, a~autentizace přes Firebase~Authentication. Od začátku jsem se snažil aplikaci navrhnout tak, aby byla co nejvíce jednoduchá, a~srozumitelná. Výsledkem je aplikace, která nabízí plně funkční~metronom, ladičku, a~přehlednou databázi~akordů.
+
+
+Odkaz na projekt: \url{https://github.com/JakubHalama/Fretfly-Maturitni_projekt}
+
+
+%% Seznam použitých informačních zdrojů
+\renewcommand\bibname{Seznam použitých informačních zdrojů}
+\begin{thebibliography}{99}
+\addcontentsline{toc}{chapter}{Seznam použitých informačních zdrojů}
+
+\bibitem{flutterDocs}
+\textit{Flutter — Documentation} [online]. Oficiální dokumentace frameworku Flutter. [cit. 2025-01-05]. Dostupné z: \url{https://docs.flutter.dev}
+
+\bibitem{flutterTutorial}
+\textit{Flutter Tutorial — Build apps for any screen} [online]. Oficiální výukové materiály Flutteru. [cit. 2025-01-05]. Dostupné z: \url{https://docs.flutter.dev/learn}
+
+\bibitem{dartDocs}
+\textit{Dart — Language Documentation} [online]. Oficiální dokumentace programovacího jazyka Dart. [cit. {2025-01-05}]. Dostupné z: \url{https://dart.dev/guides}
+
+\bibitem{firebaseFlutter}
+\textit{Firebase for Flutter — Documentation} [online]. Dokumentace k propojení Flutter aplikací se službami Firebase. [cit. 2025-01-05]. Dostupné z: \url{https://firebase.google.com/docs/flutter}
+
+\bibitem{firebaseSetup}
+\textit{Add Firebase to your Flutter app} [online]. Návod na integraci Firebase do Flutter projektu pomocí FlutterFire CLI. [cit. 2025-01-05]. Dostupné z: \url{https://firebase.google.com/docs/flutter/setup}
+
+\bibitem{firebaseCodelab}
+\textit{Get to know Firebase for Flutter — Codelab} [online]. Praktický kurz práce s autentizací a databází Firestore ve Flutter aplikaci. [cit. 2025-01-05]. Dostupné z: \url{https://firebase.google.com/codelabs/firebase-get-to-know-flutter}
+
+\bibitem{flutterLayout}
+\textit{Building layouts in Flutter} [online]. Návod na tvorbu uživatelského rozhraní pomocí widgetů. [cit. 2025-01-05]. Dostupné z: \url{https://docs.flutter.dev/ui/layout}
+
+\bibitem{stateManagement}
+\textit{State management — Flutter Documentation} [online]. Přehled přístupů ke správě stavu aplikace ve Flutteru. [cit. 2025-01-05]. Dostupné z: \url{https://docs.flutter.dev/data-and-backend/state-mgmt}
+
+\bibitem{flutterTesting}
+\textit{Testing Flutter apps} [online]. Oficiální dokumentace testování Flutter aplikací. [cit. 2025-01-05]. Dostupné z: \url{https://docs.flutter.dev/testing}
+
+\bibitem{flutterFirebaseVideo}
+\textit{Flutter and Firebase App Build — Full Tutorial} [online]. YouTube, 12.6.2022 [cit. 2025-01-05]. Dostupné z: \url{https://www.youtube.com/watch?v=1gDhl4leEzA}
+
+\bibitem{flutterAuthVideo}
+\textit{Flutter Firebase Authentication Tutorial} [online]. YouTube, 18.3.2021 [cit. 2025-01-05]. Dostupné z: \url{https://www.youtube.com/watch?v=7gqCzGgQG0U}
+
+\bibitem{flutterFirestoreVideo}
+\textit{Flutter Firestore CRUD Tutorial} [online]. YouTube, 5.9.2021 [cit. 2025-01-05]. Dostupné z: \url{https://www.youtube.com/watch?v=DqJ_KjFzL9I}
+
+\end{thebibliography}
+
+%% obrázky 
+\newpage 
+\listoffigures
+\lstlistoflistings
+
+
+
+\end{document}
